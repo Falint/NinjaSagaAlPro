@@ -3,7 +3,8 @@
 using namespace std;
 
 int main() {
-    cout << "Hello, Raylib!" << endl;
+    cout << "Hello, Ninja Saga!" << endl;
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1200, 720, "Ninja Saga");
     SetTargetFPS(60);
     InitAudioDevice();
