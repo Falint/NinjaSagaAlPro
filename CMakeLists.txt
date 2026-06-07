@@ -54,9 +54,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
 # Platform Settings
 # ==================================
 if(WIN32)
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
+    #set_target_properties(${PROJECT_NAME} PROPERTIES
+    #    WIN32_EXECUTABLE TRUE
+    # )
     target_link_libraries(${PROJECT_NAME} PRIVATE winmm)
 endif()
 
