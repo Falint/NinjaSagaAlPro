@@ -1,22 +1,20 @@
-#include "GameState.h"
 #include <iostream>
-#include <ctime>
-#include <cstdlib>
+#include "raylib.h"
+using namespace std;
 
 int main() {
-    // Seed for random number generation
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
-    
-    std::cout << "Starting C++ RPG Engine...\n\n";
-    
-    // Initialize state machine
-    GameState game;
-    
-    // Main Game Loop
-    while (game.currentState != State::EXIT) {
-        game.handleState();
+    cout << "Hello, Raylib!" << endl;
+    InitWindow(1200, 720, "Ninja Saga");
+    SetTargetFPS(60);
+    InitAudioDevice();
+  
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+            ClearBackground(BLACK);
+            EndDrawing();
     }
-    
-    std::cout << "Exiting game...\n";
+    CloseAudioDevice();
+    CloseWindow();
     return 0;
 }
