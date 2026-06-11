@@ -91,6 +91,7 @@ else()
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+
 message(STATUS "=== Ninja Saga Build Config ===")
 message(STATUS "Platform  : ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Compiler  : ${CMAKE_CXX_COMPILER_ID}")
