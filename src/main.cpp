@@ -8,9 +8,11 @@ int main() {
     InitWindow(1200, 720, "Ninja Saga");
     SetTargetFPS(60);
     InitAudioDevice();
-  
-
+    Music bgm = LoadMusicStream("assets/audio/soundtrack/MiniMacro Sound - The Ninja Gaiden Soundtrack as Interpreted by MiniMacro Sound - 04 Vow of Revenge (Opening II).mp3");
+    PlayMusicStream(bgm);
+    
     while (!WindowShouldClose()) {
+        UpdateMusicStream(bgm);
         BeginDrawing();
             ClearBackground(BLACK);
             EndDrawing();
