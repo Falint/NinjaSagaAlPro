@@ -1,6 +1,7 @@
 #include "core/SceneManager.h"
 #include "scenes/MainMenuScene.h"
 #include "scenes/SplashScene.h"
+#include "scenes/InventoryScene.h"
 #include "types.h"
 #include <memory>
 
@@ -29,7 +30,9 @@ void SceneManager::ChangeScene(SceneType type) {
   case SceneType::MainMenu:
     activeScene_ = std::make_unique<MainMenuScene>(context_);
     break;
-
+  case SceneType::Inventory:
+    activeScene_ = std::make_unique<InventoryScene>(context_);
+    break;
   default:
     break;
   }

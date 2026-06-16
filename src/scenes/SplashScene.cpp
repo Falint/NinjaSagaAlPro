@@ -31,17 +31,7 @@ SceneType SplashScene::Update(float dt) {
   else if (timer_ < SPLASH_FADE_IN_DURATION + SPLASH_HOLD_DURATION) {
     alpha_ = 1.0f;
   }
-  // Phase 3: Fade Out
-  else if (timer_ < SPLASH_TOTAL_DURATION) {
-    float fadeOutProgress =
-        (timer_ - SPLASH_FADE_IN_DURATION - SPLASH_HOLD_DURATION) /
-        SPLASH_FADE_OUT_DURATION;
-    alpha_ = 1.0f - fadeOutProgress;
-  }
   // Selesai → pindah ke MainMenu
-  else {
-    return SceneType::MainMenu;
-  }
 
   return SceneType::None; // tetap di splash
 }
@@ -55,8 +45,8 @@ void SplashScene::Draw() {
   unsigned char a = static_cast<unsigned char>(alpha_ * 255.0f);
 
   // Warna teks dengan alpha
-  Color titleColor = {255, 200, 80, a};   // Warna emas/kuning ninja
-  Color subColor = {200, 200, 200, a};     // Abu-abu terang
+  Color titleColor = {255, 200, 80, a}; // Warna emas/kuning ninja
+  Color subColor = {200, 200, 200, a};  // Abu-abu terang
 
   // Title "NINJA SAGA"
   const char *title = "NINJA SAGA";

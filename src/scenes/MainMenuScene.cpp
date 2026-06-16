@@ -1,6 +1,7 @@
 #include "scenes/MainMenuScene.h"
 #include "constants.h"
 #include "raylib.h"
+#include "types.h"
 #include <iostream>
 
 // ─── Menu Button ID ──────────────────────────────────────────
@@ -71,8 +72,9 @@ SceneType MainMenuScene::Update(float dt) {
           std::cout << "[MainMenu] SHOP clicked" << std::endl;
           break;
         case 2: // INVENTORY
-          std::cout << "[MainMenu] INVENTORY clicked" << std::endl;
-          break;
+          std::cout << "[MainMenu] INVENTORY clicked -> Go To Inventory"
+                    << std::endl;
+          return SceneType::Inventory;
         case 3: // STATUS
           std::cout << "[MainMenu] STATUS clicked" << std::endl;
           break;

@@ -10,6 +10,7 @@ enum class SceneType {
   Splash,
   MainMenu,
   Gameplay,
+  Inventory,
   Exit
 };
 
