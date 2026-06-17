@@ -1,9 +1,5 @@
 #pragma once
 #include "raylib.h"
-#include <string>
-#include <vector>
-
-using namespace std;
 
 enum class SceneType {
   None,
@@ -11,6 +7,7 @@ enum class SceneType {
   MainMenu,
   Gameplay,
   Inventory,
+  Shop,
   Exit
 };
 

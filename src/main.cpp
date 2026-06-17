@@ -3,10 +3,8 @@
 #include "types.h"
 #include <iostream>
 
-using namespace std;
-
 int main() {
-  cout << "Starting Ninja Saga..." << endl;
+  std::cout << "Starting Ninja Saga..." << std::endl;
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(1200, 720, "Ninja Saga");
   SetExitKey(KEY_NULL);

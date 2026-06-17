@@ -188,8 +188,10 @@ void BattleScene::Draw() {
   
   if (isProjectileActive_) {
     // Gambar Projectile terbang
-    Rectangle src = {0, 0, (float)projectileTex_.width, (float)projectileTex_.height};
-    Rectangle dst = {projectileX_, projectileY_, projectileTex_.width * BATTLE_PROJECTILE_SCALE, projectileTex_.height * BATTLE_PROJECTILE_SCALE};
+    Rectangle src = {0, 0, static_cast<float>(projectileTex_.width), static_cast<float>(projectileTex_.height)};
+    Rectangle dst = {projectileX_, projectileY_,
+                     static_cast<float>(projectileTex_.width) * BATTLE_PROJECTILE_SCALE,
+                     static_cast<float>(projectileTex_.height) * BATTLE_PROJECTILE_SCALE};
     DrawTexturePro(projectileTex_, src, dst, {0, 0}, 0.0f, WHITE);
   }
 
@@ -200,10 +202,10 @@ void BattleScene::DrawPlayer() {
   Texture2D tex = isPlayerAttacking_ ? playerAttackTex_ : playerIdleTex_;
   int frames = isPlayerAttacking_ ? BATTLE_PLAYER_FRAMES_ATTACK : BATTLE_PLAYER_FRAMES_IDLE;
 
-  float frameW = (float)tex.width / frames;
-  float frameH = (float)tex.height;
+  float frameW = static_cast<float>(tex.width) / frames;
+  float frameH = static_cast<float>(tex.height);
 
-  Rectangle src = { (float)playerCurrentFrame_ * frameW, 0, frameW, frameH };
+  Rectangle src = {static_cast<float>(playerCurrentFrame_) * frameW, 0, frameW, frameH};
   
   float drawW = frameW * BATTLE_PLAYER_SCALE;
   float drawH = frameH * BATTLE_PLAYER_SCALE;
@@ -233,13 +235,17 @@ void BattleScene::DrawEnemy() {
     frames = BATTLE_ENEMY_FRAMES_ATTACK;
   }
 
-  float frameW = 79.0f; // Sesuai analisis, width konstan
-  if (isEnemyDead_) frameW = (float)tex.width / frames; // khusus death sedikit beda proporsinya (553/7 = 79 juga)
-  
-  float frameH = (float)tex.height;
+  // Lebar per-frame konstan 79px sesuai analisis sprite sheet
+  constexpr float ENEMY_SPRITE_FRAME_WIDTH = 79.0f;
+  float frameW = ENEMY_SPRITE_FRAME_WIDTH;
+  if (isEnemyDead_) {
+    frameW = static_cast<float>(tex.width) / frames;
+  }
+
+  float frameH = static_cast<float>(tex.height);
 
   // Flip horizontal dengan width negatif
-  Rectangle src = { (float)enemyCurrentFrame_ * frameW, 0, -frameW, frameH };
+  Rectangle src = {static_cast<float>(enemyCurrentFrame_) * frameW, 0, -frameW, frameH};
   
   float drawW = frameW * BATTLE_ENEMY_SCALE;
   float drawH = frameH * BATTLE_ENEMY_SCALE;
@@ -259,10 +265,10 @@ void BattleScene::DrawEnemy() {
 void BattleScene::DrawHealthBar(float x, float y, int currentHP, int maxHP) {
   // Option A: Gunakan RedMeter Sprite
   float scale = 2.0f;
-  float drawW = healthBgTex_.width * scale;
-  float drawH = healthBgTex_.height * scale;
+  float drawW = static_cast<float>(healthBgTex_.width) * scale;
+  float drawH = static_cast<float>(healthBgTex_.height) * scale;
 
-  Rectangle src = { 0, 0, (float)healthBgTex_.width, (float)healthBgTex_.height };
+  Rectangle src = {0, 0, static_cast<float>(healthBgTex_.width), static_cast<float>(healthBgTex_.height)};
   Rectangle dst = { x, y, drawW, drawH };
 
   // Draw Background
@@ -303,17 +309,45 @@ void BattleScene::DrawBattleUI() {
 }
 
 void BattleScene::OnExit() {
-  UnloadTexture(playerIdleTex_);
-  UnloadTexture(playerAttackTex_);
+  // Guard: hanya UnloadTexture jika texture berhasil di-load
+  if (playerIdleTex_.id != 0) {
+    UnloadTexture(playerIdleTex_);
+    playerIdleTex_ = {};
+  }
+  if (playerAttackTex_.id != 0) {
+    UnloadTexture(playerAttackTex_);
+    playerAttackTex_ = {};
+  }
 
-  UnloadTexture(enemyIdleTex_);
-  UnloadTexture(enemyAttackTex_);
-  UnloadTexture(enemyHurtTex_);
-  UnloadTexture(enemyDeathTex_);
-  UnloadTexture(projectileTex_);
+  if (enemyIdleTex_.id != 0) {
+    UnloadTexture(enemyIdleTex_);
+    enemyIdleTex_ = {};
+  }
+  if (enemyAttackTex_.id != 0) {
+    UnloadTexture(enemyAttackTex_);
+    enemyAttackTex_ = {};
+  }
+  if (enemyHurtTex_.id != 0) {
+    UnloadTexture(enemyHurtTex_);
+    enemyHurtTex_ = {};
+  }
+  if (enemyDeathTex_.id != 0) {
+    UnloadTexture(enemyDeathTex_);
+    enemyDeathTex_ = {};
+  }
+  if (projectileTex_.id != 0) {
+    UnloadTexture(projectileTex_);
+    projectileTex_ = {};
+  }
 
-  UnloadTexture(healthBgTex_);
+  if (healthBgTex_.id != 0) {
+    UnloadTexture(healthBgTex_);
+    healthBgTex_ = {};
+  }
   for (int i = 0; i < 10; i++) {
-    UnloadTexture(healthFillTex_[i]);
+    if (healthFillTex_[i].id != 0) {
+      UnloadTexture(healthFillTex_[i]);
+      healthFillTex_[i] = {};
+    }
   }
 }

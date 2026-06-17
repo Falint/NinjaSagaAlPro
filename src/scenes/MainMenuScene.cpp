@@ -10,6 +10,20 @@ enum class MenuButton { None, Play, Shop, Inventory, Status, Exit };
 // ─── Constructor ─────────────────────────────────────────────
 MainMenuScene::MainMenuScene(GameContext ctx) : context_(ctx) {}
 
+// ── Kalkulasi layout terpusat — tidak perlu copy-paste lagi ──
+MenuLayout MainMenuScene::CalcLayout() const {
+  int screenW = GetScreenWidth();
+  int screenH = GetScreenHeight();
+
+  float scale = static_cast<float>(screenH) / MENU_BASE_SIZE;
+  float drawW = MENU_BASE_SIZE * scale;
+  float drawH = MENU_BASE_SIZE * scale;
+  float imgX = (static_cast<float>(screenW) - drawW) / 2.0f;
+  float imgY = (static_cast<float>(screenH) - drawH) / 2.0f;
+
+  return {drawW, drawH, imgX, imgY};
+}
+
 // ─── OnEnter ─────────────────────────────────────────────────
 void MainMenuScene::OnEnter() {
   menuFrames_[0] = LoadTexture(ASSET_MENU_FRAME_1);
@@ -33,56 +47,47 @@ SceneType MainMenuScene::Update(float dt) {
   if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) {
     return SceneType::Exit;
   }
-  int screenW = GetScreenWidth();
-  int screenH = GetScreenHeight();
+
   Vector2 mouse = GetMousePosition();
 
-  // Hitung scaling dari 200x200 ke ukuran layar agar aspect ratio tetap terjaga
-  // (fit ke height)
-  float scale = static_cast<float>(screenH) / MENU_BASE_SIZE;
-  float drawW = MENU_BASE_SIZE * scale;
-  float drawH = MENU_BASE_SIZE * scale;
-  float imgX = (screenW - drawW) / 2.0f;
-  float imgY = (screenH - drawH) / 2.0f;
+  // ── Hitung layout menggunakan helper terpusat ──
+  MenuLayout layout = CalcLayout();
 
   currentFrameIndex_ = 0; // Default frame (Idle)
 
   for (int i = 0; i < BUTTON_COUNT; i++) {
     // Hitung hitbox riil di layar berdasarkan rasio 0.0 - 1.0 dari gambar
-    // 200x200
-    float bx = imgX + (MENU_HITBOXES[i][0] * drawW);
-    float by = imgY + (MENU_HITBOXES[i][1] * drawH);
-    float bw = MENU_HITBOXES[i][2] * drawW;
-    float bh = MENU_HITBOXES[i][3] * drawH;
+    float bx = layout.imgX + (MENU_HITBOXES[i][0] * layout.drawW);
+    float by = layout.imgY + (MENU_HITBOXES[i][1] * layout.drawH);
+    float bw = MENU_HITBOXES[i][2] * layout.drawW;
+    float bh = MENU_HITBOXES[i][3] * layout.drawH;
     Rectangle btn = {bx, by, bw, bh};
 
     if (CheckCollisionPointRec(mouse, btn)) {
-      // 1 = idle, 2 = play, 3 = shop, 4 = inventory, 5 = status, 6 = exit
-      // Karena index array mulai dari 0:
-      // i=0 (Play) -> frame 2 -> index 1
-      // i=1 (Shop) -> frame 3 -> index 2
-      // i=2 (Inventory) -> frame 4 -> index 3
-      // i=3 (Status) -> frame 5 -> index 4
-      // i=4 (Exit) -> frame 6 -> index 5
+      // i=0 (Play) -> frame index 1, i=1 (Shop) -> frame index 2, dst.
       currentFrameIndex_ = i + 1;
 
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        switch (i) {
-        case 0: // PLAY
+        // Gunakan enum MenuButton agar kode lebih deskriptif
+        MenuButton clicked = static_cast<MenuButton>(i + 1);
+        switch (clicked) {
+        case MenuButton::Play:
           std::cout << "[MainMenu] PLAY clicked -> Go to Battle" << std::endl;
           return SceneType::Gameplay;
-        case 1: // SHOP
-          std::cout << "[MainMenu] SHOP clicked" << std::endl;
-          break;
-        case 2: // INVENTORY
+        case MenuButton::Shop:
+          std::cout << "[MainMenu] SHOP clicked -> Go To Shop" << std::endl;
+          return SceneType::Shop;
+        case MenuButton::Inventory:
           std::cout << "[MainMenu] INVENTORY clicked -> Go To Inventory"
                     << std::endl;
           return SceneType::Inventory;
-        case 3: // STATUS
+        case MenuButton::Status:
           std::cout << "[MainMenu] STATUS clicked" << std::endl;
           break;
-        case 4: // EXIT
+        case MenuButton::Exit:
           return SceneType::Exit;
+        default:
+          break;
         }
       }
     }
@@ -97,23 +102,15 @@ SceneType MainMenuScene::Update(float dt) {
 
 // ─── Draw ────────────────────────────────────────────────────
 void MainMenuScene::Draw() {
-  constexpr bool DEBUG_HITBOX = false; // Matikan warna hitbox
-
-  int screenW = GetScreenWidth();
-  int screenH = GetScreenHeight();
-
   // Draw HANYA SATU gambar fullscreen
   Texture2D texToDraw = menuFrames_[currentFrameIndex_];
 
-  float scale = static_cast<float>(screenH) / MENU_BASE_SIZE;
-  float drawW = MENU_BASE_SIZE * scale;
-  float drawH = MENU_BASE_SIZE * scale;
-  float imgX = (screenW - drawW) / 2.0f;
-  float imgY = (screenH - drawH) / 2.0f;
+  // ── Hitung layout menggunakan helper terpusat ──
+  MenuLayout layout = CalcLayout();
 
   Rectangle srcRect = {0, 0, static_cast<float>(texToDraw.width),
                        static_cast<float>(texToDraw.height)};
-  Rectangle dstRect = {imgX, imgY, drawW, drawH};
+  Rectangle dstRect = {layout.imgX, layout.imgY, layout.drawW, layout.drawH};
 
   DrawTexturePro(texToDraw, srcRect, dstRect, {0, 0}, 0.0f, WHITE);
 
@@ -124,7 +121,7 @@ void MainMenuScene::Draw() {
   }
 
   // ── Debug Hitbox Berwarna ──
-  if (DEBUG_HITBOX) {
+  if (MENU_DEBUG_HITBOX) {
     Color debugColors[BUTTON_COUNT] = {
         {255, 0, 0, 150},   // PLAY - Merah
         {0, 255, 0, 150},   // SHOP - Hijau
@@ -134,10 +131,10 @@ void MainMenuScene::Draw() {
     };
 
     for (int i = 0; i < BUTTON_COUNT; i++) {
-      float bx = imgX + (MENU_HITBOXES[i][0] * drawW);
-      float by = imgY + (MENU_HITBOXES[i][1] * drawH);
-      float bw = MENU_HITBOXES[i][2] * drawW;
-      float bh = MENU_HITBOXES[i][3] * drawH;
+      float bx = layout.imgX + (MENU_HITBOXES[i][0] * layout.drawW);
+      float by = layout.imgY + (MENU_HITBOXES[i][1] * layout.drawH);
+      float bw = MENU_HITBOXES[i][2] * layout.drawW;
+      float bh = MENU_HITBOXES[i][3] * layout.drawH;
 
       Rectangle rect = {bx, by, bw, bh};
       DrawRectangleRec(rect, debugColors[i]);  // Fill transparan

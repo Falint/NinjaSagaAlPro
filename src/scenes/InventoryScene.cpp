@@ -1,9 +1,29 @@
 #include "scenes/InventoryScene.h"
 #include "constants.h"
 #include "raylib.h"
+#include <algorithm>
 #include <iostream>
 
 InventoryScene::InventoryScene(GameContext ctx) : context_(ctx) {}
+
+// ── Kalkulasi layout terpusat — tidak perlu copy-paste lagi ──
+InvLayout InventoryScene::CalcLayout() const {
+  int screenW = GetScreenWidth();
+  int screenH = GetScreenHeight();
+
+  float fitScale =
+      static_cast<float>(std::min(screenW, screenH)) / INV_BASE_SIZE;
+  float finalScale = fitScale * INV_SCALE_FACTOR;
+  float drawSize = INV_BASE_SIZE * finalScale;
+
+  float imgX = (static_cast<float>(screenW) - drawSize) / 2.0f;
+  float imgY = (static_cast<float>(screenH) - drawSize) / 2.0f;
+
+  float cellW = drawSize / static_cast<float>(INV_GRID_COLS);
+  float cellH = drawSize / static_cast<float>(INV_GRID_ROWS);
+
+  return {imgX, imgY, drawSize, cellW, cellH, finalScale};
+}
 
 void InventoryScene::OnEnter() {
   // Load background inventory (grid 3x3)
@@ -36,22 +56,8 @@ SceneType InventoryScene::Update(float dt) {
     return SceneType::MainMenu;
   }
 
-  // ── Hitung posisi & ukuran inventory yang sudah di-scale ──
-  int screenW = GetScreenWidth();
-  int screenH = GetScreenHeight();
-
-  float fitScale =
-      static_cast<float>(screenH < screenW ? screenH : screenW) / INV_BASE_SIZE;
-  float finalScale = fitScale * INV_SCALE_FACTOR;
-  float drawSize = INV_BASE_SIZE * finalScale;
-
-  // Posisi centered di layar
-  float imgX = (static_cast<float>(screenW) - drawSize) / 2.0f;
-  float imgY = (static_cast<float>(screenH) - drawSize) / 2.0f;
-
-  // Ukuran setiap cell dalam grid 3x3
-  float cellW = drawSize / static_cast<float>(INV_GRID_COLS);
-  float cellH = drawSize / static_cast<float>(INV_GRID_ROWS);
+  // ── Hitung layout menggunakan helper terpusat ──
+  InvLayout layout = CalcLayout();
 
   // ── Deteksi mouse ada di cell mana ──
   Vector2 mouse = GetMousePosition();
@@ -61,12 +67,17 @@ SceneType InventoryScene::Update(float dt) {
     int col = i % INV_GRID_COLS;
     int row = i / INV_GRID_COLS;
 
-    float cellX = imgX + static_cast<float>(col) * cellW;
-    float cellY = imgY + static_cast<float>(row) * cellH;
+    float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
+    float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
 
-    Rectangle cellRect = {cellX, cellY, cellW, cellH};
+    float hx = cellX + (INV_SLOT_HITBOXES[i][0] * layout.cellW);
+    float hy = cellY + (INV_SLOT_HITBOXES[i][1] * layout.cellH);
+    float hw = INV_SLOT_HITBOXES[i][2] * layout.cellW;
+    float hh = INV_SLOT_HITBOXES[i][3] * layout.cellH;
 
-    if (CheckCollisionPointRec(mouse, cellRect)) {
+    Rectangle hitboxRect = {hx, hy, hw, hh};
+
+    if (CheckCollisionPointRec(mouse, hitboxRect)) {
       hoveredSlot_ = i;
       break;
     }
@@ -94,31 +105,16 @@ SceneType InventoryScene::Update(float dt) {
 }
 
 void InventoryScene::Draw() {
-  // Flag debug: set true untuk melihat kotak hitbox berwarna
-
-  constexpr bool DEBUG_HITBOX = false;
-
-  int screenW = GetScreenWidth();
-  int screenH = GetScreenHeight();
-
   ClearBackground(BLACK);
 
-  // ── Hitung posisi & ukuran (sama seperti di Update) ──
-  float fitScale =
-      static_cast<float>(screenH < screenW ? screenH : screenW) / INV_BASE_SIZE;
-  float finalScale = fitScale * INV_SCALE_FACTOR;
-  float drawSize = INV_BASE_SIZE * finalScale;
-
-  float imgX = (static_cast<float>(screenW) - drawSize) / 2.0f;
-  float imgY = (static_cast<float>(screenH) - drawSize) / 2.0f;
-
-  float cellW = drawSize / static_cast<float>(INV_GRID_COLS);
-  float cellH = drawSize / static_cast<float>(INV_GRID_ROWS);
+  // ── Hitung layout menggunakan helper terpusat ──
+  InvLayout layout = CalcLayout();
 
   // ── 1. Draw Inv.png sebagai background (centered + scaled) ──
   Rectangle srcRect = {0, 0, static_cast<float>(invTexture_.width),
                        static_cast<float>(invTexture_.height)};
-  Rectangle dstRect = {imgX, imgY, drawSize, drawSize};
+  Rectangle dstRect = {layout.imgX, layout.imgY, layout.drawSize,
+                       layout.drawSize};
 
   DrawTexturePro(invTexture_, srcRect, dstRect, {0, 0}, 0.0f, WHITE);
 
@@ -127,13 +123,19 @@ void InventoryScene::Draw() {
     int col = hoveredSlot_ % INV_GRID_COLS;
     int row = hoveredSlot_ / INV_GRID_COLS;
 
-    float cellX = imgX + static_cast<float>(col) * cellW;
-    float cellY = imgY + static_cast<float>(row) * cellH;
+    float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
+    float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
 
-    // Render Inv_hitbox.png di-scale ke ukuran cell, tepat di posisi slot
+    // Render Inv_hitbox.png sesuai nilai hitbox di constants.h
     Rectangle hitboxSrc = {0, 0, static_cast<float>(hitboxTexture_.width),
                            static_cast<float>(hitboxTexture_.height)};
-    Rectangle hitboxDst = {cellX, cellY, cellW, cellH};
+
+    float hx = cellX + (INV_SLOT_HITBOXES[hoveredSlot_][0] * layout.cellW);
+    float hy = cellY + (INV_SLOT_HITBOXES[hoveredSlot_][1] * layout.cellH);
+    float hw = INV_SLOT_HITBOXES[hoveredSlot_][2] * layout.cellW;
+    float hh = INV_SLOT_HITBOXES[hoveredSlot_][3] * layout.cellH;
+
+    Rectangle hitboxDst = {hx, hy, hw, hh};
 
     DrawTexturePro(hitboxTexture_, hitboxSrc, hitboxDst, {0, 0}, 0.0f, WHITE);
 
@@ -157,18 +159,16 @@ void InventoryScene::Draw() {
                              frameWidth, frameHeight};
 
     // Tentukan besar skala karakter menggunakan konstant INV_CHAR_SCALE
-    float charScale = finalScale * INV_CHAR_SCALE;
+    float charScale = layout.finalScale * INV_CHAR_SCALE;
     float charDrawWidth = frameWidth * charScale;
     float charDrawHeight = frameHeight * charScale;
 
     // Hitung posisi Karakter: tepat di tengah-tengah inventory ditambah Offset
-    // X
-    float charX =
-        imgX + (drawSize / 2.0f) - (charDrawWidth / 2.0f) + INV_CHAR_OFFSET_X;
+    float charX = layout.imgX + (layout.drawSize / 2.0f) -
+                  (charDrawWidth / 2.0f) + INV_CHAR_OFFSET_X;
 
-    // Vertikal: Posisikan tepat di atas inventory dikurangi Offset Y untuk
-    // jarak
-    float charY = imgY - charDrawHeight - INV_CHAR_OFFSET_Y;
+    // Vertikal: Posisikan tepat di atas inventory dikurangi Offset Y
+    float charY = layout.imgY - charDrawHeight - INV_CHAR_OFFSET_Y;
 
     Rectangle charDstRect = {charX, charY, charDrawWidth, charDrawHeight};
 
@@ -178,12 +178,13 @@ void InventoryScene::Draw() {
     // +++ DEBUG HITBOX KARAKTER +++
     if (INV_CHAR_DEBUG_HITBOX) {
       DrawRectangleLinesEx(charDstRect, 2.0f, RED);
-      DrawText("CHAR HITBOX", charX, charY - 20, 20, RED);
+      DrawText("CHAR HITBOX", static_cast<int>(charX),
+               static_cast<int>(charY - 20), 20, RED);
     }
   }
 
   // ── Debug: tampilkan kotak hitbox berwarna untuk kalibrasi ──
-  if (DEBUG_HITBOX) {
+  if (INV_DEBUG_HITBOX) {
     Color slotColors[INV_SLOT_COUNT] = {
         {255, 0, 0, 100},     // Slot 0 - Merah
         {0, 255, 0, 100},     // Slot 1 - Hijau
@@ -200,13 +201,13 @@ void InventoryScene::Draw() {
       int col = i % INV_GRID_COLS;
       int row = i / INV_GRID_COLS;
 
-      float cellX = imgX + static_cast<float>(col) * cellW;
-      float cellY = imgY + static_cast<float>(row) * cellH;
+      float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
+      float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
 
-      float hx = cellX + (INV_SLOT_HITBOXES[i][0] * cellW);
-      float hy = cellY + (INV_SLOT_HITBOXES[i][1] * cellH);
-      float hw = INV_SLOT_HITBOXES[i][2] * cellW;
-      float hh = INV_SLOT_HITBOXES[i][3] * cellH;
+      float hx = cellX + (INV_SLOT_HITBOXES[i][0] * layout.cellW);
+      float hy = cellY + (INV_SLOT_HITBOXES[i][1] * layout.cellH);
+      float hw = INV_SLOT_HITBOXES[i][2] * layout.cellW;
+      float hh = INV_SLOT_HITBOXES[i][3] * layout.cellH;
 
       Rectangle rect = {hx, hy, hw, hh};
       DrawRectangleRec(rect, slotColors[i]);
@@ -215,7 +216,6 @@ void InventoryScene::Draw() {
   }
 
   // ── Info text ──
-
   if (hoveredSlot_ >= 0) {
     const char *slotText = TextFormat("Hover: Slot %d", hoveredSlot_);
     DrawText(slotText, 20, 50, 20, GREEN);

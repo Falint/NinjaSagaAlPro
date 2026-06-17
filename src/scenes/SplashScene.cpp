@@ -31,7 +31,15 @@ SceneType SplashScene::Update(float dt) {
   else if (timer_ < SPLASH_FADE_IN_DURATION + SPLASH_HOLD_DURATION) {
     alpha_ = 1.0f;
   }
+  // Phase 3: Fade Out
+  else if (timer_ < SPLASH_TOTAL_DURATION) {
+    float t = timer_ - SPLASH_FADE_IN_DURATION - SPLASH_HOLD_DURATION;
+    alpha_ = 1.0f - (t / SPLASH_FADE_OUT_DURATION);
+  }
   // Selesai → pindah ke MainMenu
+  else {
+    return SceneType::MainMenu;
+  }
 
   return SceneType::None; // tetap di splash
 }

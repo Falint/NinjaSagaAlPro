@@ -3,6 +3,17 @@
 #include "core/BaseScene.h"
 #include "types.h"
 
+// Struct untuk menyimpan hasil kalkulasi layout inventory
+// supaya tidak perlu copy-paste perhitungan di Update() dan Draw()
+struct InvLayout {
+  float imgX;       // Posisi X inventory di layar
+  float imgY;       // Posisi Y inventory di layar
+  float drawSize;   // Ukuran inventory setelah di-scale
+  float cellW;      // Lebar satu cell grid
+  float cellH;      // Tinggi satu cell grid
+  float finalScale; // Scale akhir untuk referensi
+};
+
 class InventoryScene : public BaseScene {
 public:
   explicit InventoryScene(GameContext context);
@@ -14,6 +25,9 @@ public:
   void OnExit() override;
 
 private:
+  // Hitung layout inventory berdasarkan ukuran layar saat ini
+  InvLayout CalcLayout() const;
+
   // Variabel untuk animasi karakter idle_down.png
   Texture2D charTexture_ = {};     // Texture animasi karakter
   int charFramesCounter_ = 0;      // Penghitung waktu untuk ganti frame

@@ -66,21 +66,24 @@ constexpr int INV_GRID_COLS = 3;
 constexpr int INV_GRID_ROWS = 3;
 constexpr int INV_SLOT_COUNT = INV_GRID_COLS * INV_GRID_ROWS; // 9
 
-constexpr bool DEBUG_HITBOX = false;
+// Debug flags per-scene (set true untuk melihat kotak hitbox berwarna)
+constexpr bool INV_DEBUG_HITBOX = true;
+constexpr bool MENU_DEBUG_HITBOX = false;
+
 // Per-slot hitbox (rasio relatif terhadap cell size masing-masing)
 // Dari analisis Inv_hitbox.png (64x64): inner area pixel (18,18)→(45,47)
 // Format: { X_Ratio, Y_Ratio, Width_Ratio, Height_Ratio }
 // Setiap slot bisa diubah sendiri tanpa mempengaruhi slot lain
 constexpr float INV_SLOT_HITBOXES[INV_SLOT_COUNT][4] = {
-    {0.48f, 0.28f, 0.74f, 0.47f}, // Slot 0 (kiri atas)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 1 (tengah atas)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 2 (kanan atas)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 3 (kiri tengah)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 4 (tengah)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 5 (kanan tengah)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 6 (kiri bawah)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 7 (tengah bawah)
-    {0.28f, 0.28f, 0.74f, 0.47f}, // Slot 8 (kanan bawah)
+    {0.38f, 0.28f, 0.74f, 0.77f}, // Slot 0 (kiri atas)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 1 (tengah atas)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 2 (kanan atas)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 3 (kiri tengah)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 4 (tengah)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 5 (kanan tengah)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 6 (kiri bawah)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 7 (tengah bawah)
+    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 8 (kanan bawah)
 };
 
 // -- Battle Scene Constants --
