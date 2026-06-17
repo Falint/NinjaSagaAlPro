@@ -19,6 +19,13 @@ void InventoryScene::OnEnter() {
     std::cerr << "[ERROR] Gagal load texture: " << ASSET_INVENTORY_HITBOX
               << std::endl;
   }
+
+  // Load texture karakter untuk animasi di samping inventory
+  charTexture_ = LoadTexture(ASSET_CHARACTER_IDLE);
+  if (charTexture_.id == 0) {
+    std::cerr << "[ERROR] Gagal load texture: " << ASSET_CHARACTER_IDLE
+              << std::endl;
+  }
 }
 
 SceneType InventoryScene::Update(float dt) {
@@ -65,12 +72,31 @@ SceneType InventoryScene::Update(float dt) {
     }
   }
 
+  // ── Update Animasi Karakter ──
+  // Kecepatan animasi (berapa frame per detik)
+  int framesSpeed = 8;
+
+  // Tambah waktu penghitung setiap frame (berdasarkan 60 FPS dari Raylib)
+  charFramesCounter_++;
+
+  // Jika penghitung sudah melampaui batas kecepatan untuk frame selanjutnya
+  if (charFramesCounter_ >= (60 / framesSpeed)) {
+    charFramesCounter_ = 0; // Reset penghitung
+    charCurrentFrame_++;    // Pindah ke frame animasi berikutnya
+
+    // Jika animasi mencapai akhir, kembali ke frame pertama (loop)
+    if (charCurrentFrame_ >= charNumFrames_) {
+      charCurrentFrame_ = 0;
+    }
+  }
+
   return SceneType::None;
 }
 
 void InventoryScene::Draw() {
   // Flag debug: set true untuk melihat kotak hitbox berwarna
-  constexpr bool DEBUG_HITBOX = true;
+
+  constexpr bool DEBUG_HITBOX = false;
 
   int screenW = GetScreenWidth();
   int screenH = GetScreenHeight();
@@ -115,6 +141,45 @@ void InventoryScene::Draw() {
     SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
   } else {
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+  }
+
+  // ── 3. Draw Animasi Karakter di Samping Kiri Inventory ──
+  if (charTexture_.id != 0) {
+    // Hitung ukuran lebar untuk satu frame (total lebar dibagi jumlah frame)
+    float frameWidth = static_cast<float>(charTexture_.width) /
+                       static_cast<float>(charNumFrames_);
+    float frameHeight = static_cast<float>(charTexture_.height);
+
+    // Bingkai/Jendela untuk memotong gambar ke satu frame saja
+    Rectangle charSrcRect = {static_cast<float>(charCurrentFrame_) *
+                                 frameWidth, // Posisi X bergeser tiap frame
+                             0.0f,           // Posisi Y tetap (atas)
+                             frameWidth, frameHeight};
+
+    // Tentukan besar skala karakter menggunakan konstant INV_CHAR_SCALE
+    float charScale = finalScale * INV_CHAR_SCALE;
+    float charDrawWidth = frameWidth * charScale;
+    float charDrawHeight = frameHeight * charScale;
+
+    // Hitung posisi Karakter: tepat di tengah-tengah inventory ditambah Offset
+    // X
+    float charX =
+        imgX + (drawSize / 2.0f) - (charDrawWidth / 2.0f) + INV_CHAR_OFFSET_X;
+
+    // Vertikal: Posisikan tepat di atas inventory dikurangi Offset Y untuk
+    // jarak
+    float charY = imgY - charDrawHeight - INV_CHAR_OFFSET_Y;
+
+    Rectangle charDstRect = {charX, charY, charDrawWidth, charDrawHeight};
+
+    // Gambar karakter animasi ke layar
+    DrawTexturePro(charTexture_, charSrcRect, charDstRect, {0, 0}, 0.0f, WHITE);
+
+    // +++ DEBUG HITBOX KARAKTER +++
+    if (INV_CHAR_DEBUG_HITBOX) {
+      DrawRectangleLinesEx(charDstRect, 2.0f, RED);
+      DrawText("CHAR HITBOX", charX, charY - 20, 20, RED);
+    }
   }
 
   // ── Debug: tampilkan kotak hitbox berwarna untuk kalibrasi ──
@@ -166,5 +231,12 @@ void InventoryScene::OnExit() {
     UnloadTexture(hitboxTexture_);
     hitboxTexture_ = {};
   }
+  // Unload texture karakter saat keluar dari Scene Inventory
+  if (charTexture_.id != 0) {
+    UnloadTexture(charTexture_);
+    charTexture_ = {};
+  }
   hoveredSlot_ = -1;
+  charCurrentFrame_ = 0;
+  charFramesCounter_ = 0;
 }

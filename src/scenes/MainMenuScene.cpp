@@ -30,6 +30,9 @@ void MainMenuScene::OnEnter() {
 SceneType MainMenuScene::Update(float dt) {
   (void)dt;
 
+  if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) {
+    return SceneType::Exit;
+  }
   int screenW = GetScreenWidth();
   int screenH = GetScreenHeight();
   Vector2 mouse = GetMousePosition();
@@ -66,8 +69,8 @@ SceneType MainMenuScene::Update(float dt) {
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         switch (i) {
         case 0: // PLAY
-          std::cout << "[MainMenu] PLAY clicked" << std::endl;
-          break;
+          std::cout << "[MainMenu] PLAY clicked -> Go to Battle" << std::endl;
+          return SceneType::Gameplay;
         case 1: // SHOP
           std::cout << "[MainMenu] SHOP clicked" << std::endl;
           break;
