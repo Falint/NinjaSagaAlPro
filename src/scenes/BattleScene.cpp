@@ -1,6 +1,7 @@
 #include "scenes/BattleScene.h"
 #include "constants.h"
 #include <iostream>
+#include <raylib.h>
 
 BattleScene::BattleScene(GameContext ctx) : context_(ctx) {}
 
@@ -19,16 +20,19 @@ void BattleScene::OnEnter() {
   // Load Health Bar
   healthBgTex_ = LoadTexture(ASSET_BATTLE_HEALTH_BG);
   for (int i = 0; i < 10; i++) {
-    std::string path = std::string(ASSET_BATTLE_HEALTH_FILL_PREFIX) + 
+    std::string path = std::string(ASSET_BATTLE_HEALTH_FILL_PREFIX) +
                        (i < 9 ? "0" : "") + std::to_string(i + 1) + ".png";
     healthFillTex_[i] = LoadTexture(path.c_str());
   }
 
   // Init Stats
-  playerMaxHP_ = BATTLE_PLAYER_MAX_HP;
-  playerHP_ = playerMaxHP_;
-  enemyMaxHP_ = BATTLE_ENEMY_MAX_HP;
-  enemyHP_ = enemyMaxHP_;
+  Player_.maxHp = BATTLE_PLAYER_MAX_HP;
+  Player_.hp = Player_.maxHp;
+  Player_.attack = 2;
+
+  Enemy_.maxHp = BATTLE_PLAYER_MAX_HP;
+  Enemy_.hp = Enemy_.maxHp;
+  Enemy_.attack = BATTLE_ENEMY_DAMAGE;
 
   // Init State
   currentState_ = BattleState::Start;
@@ -60,10 +64,27 @@ SceneType BattleScene::Update(float dt) {
   case BattleState::Start:
     if (stateTimer_ >= BATTLE_STATE_DELAY) {
       stateTimer_ = 0.0f;
-      currentState_ = BattleState::PlayerTurn;
-      isPlayerAttacking_ = true;
-      playerCurrentFrame_ = 0; // Reset animasi attack
+      currentState_ = BattleState::PlayerIsChoosing;
     }
+    break;
+
+  case BattleState::PlayerIsChoosing:
+    if (IsKeyPressed(KEY_ONE)) {
+      std::cout << "[Battle] Player Pilih attack!\n";
+
+      Enemy_.TakeDamage(Player_.attack);
+
+      isPlayerAttacking_ = true;
+      playerCurrentFrame_ = 0;
+      playerFrameCounter_ = 0;
+
+      currentState_ = BattleState::PlayerTurn;
+      stateTimer_ = 0.0f;
+    }
+    // if (IsKeyPressed()) {  // template buat tambahan interaksi apa yang bisa
+    // player buat
+    //
+    // }
     break;
 
   case BattleState::PlayerTurn:
@@ -77,15 +98,14 @@ SceneType BattleScene::Update(float dt) {
 
     // Logic saat player nyerang otomatis
     if (stateTimer_ >= BATTLE_STATE_DELAY) {
-      enemyHP_ -= BATTLE_PLAYER_DAMAGE;
-      std::cout << "Player Attack! Enemy HP: " << enemyHP_ << std::endl;
-      
+      std::cout << "Player Attack Animation Finished!" << std::endl;
+
       isPlayerAttacking_ = false;
       isEnemyHurt_ = true;
       enemyCurrentFrame_ = 0;
-      
+
       stateTimer_ = 0.0f;
-      if (enemyHP_ <= 0) {
+      if (!Enemy_.IsAlive()) {
         currentState_ = BattleState::Win;
         isEnemyDead_ = true;
         enemyCurrentFrame_ = 0;
@@ -101,21 +121,21 @@ SceneType BattleScene::Update(float dt) {
   case BattleState::EnemyTurn:
     // Tunggu animasi enemy attack + lempar projectile sebelum kena player
     if (stateTimer_ >= BATTLE_STATE_DELAY) {
-      playerHP_ -= BATTLE_ENEMY_DAMAGE;
-      std::cout << "Enemy Attack! Player HP: " << playerHP_ << std::endl;
-      
+      Player_.TakeDamage(Enemy_.attack);
+      std::cout << "Enemy Attack! Player HP: " << Player_.hp << std::endl;
+
       isEnemyAttacking_ = false;
       isEnemyHurt_ = false; // Reset hurt
-      
+
       // Hitung projectile otomatis selesai saat delay
       isProjectileActive_ = false;
 
       stateTimer_ = 0.0f;
-      if (playerHP_ <= 0) {
+      if (!Player_.IsAlive()) {
         currentState_ = BattleState::Lose;
         std::cout << "You Lose!" << std::endl;
       } else {
-        currentState_ = BattleState::PlayerTurn;
+        currentState_ = BattleState::PlayerIsChoosing;
         isPlayerAttacking_ = true;
         playerCurrentFrame_ = 0;
       }
@@ -153,8 +173,9 @@ void BattleScene::UpdateAnimations() {
   playerFrameCounter_++;
   if (playerFrameCounter_ >= (60 / BATTLE_ANIM_FPS)) {
     playerFrameCounter_ = 0;
-    
-    int pFrames = isPlayerAttacking_ ? BATTLE_PLAYER_FRAMES_ATTACK : BATTLE_PLAYER_FRAMES_IDLE;
+
+    int pFrames = isPlayerAttacking_ ? BATTLE_PLAYER_FRAMES_ATTACK
+                                     : BATTLE_PLAYER_FRAMES_IDLE;
     playerCurrentFrame_++;
     if (playerCurrentFrame_ >= pFrames) {
       playerCurrentFrame_ = 0;
@@ -166,9 +187,12 @@ void BattleScene::UpdateAnimations() {
     enemyFrameCounter_ = 0;
 
     int eFrames = BATTLE_ENEMY_FRAMES_IDLE;
-    if (isEnemyDead_) eFrames = BATTLE_ENEMY_FRAMES_DEATH;
-    else if (isEnemyHurt_) eFrames = BATTLE_ENEMY_FRAMES_HURT;
-    else if (isEnemyAttacking_) eFrames = BATTLE_ENEMY_FRAMES_ATTACK;
+    if (isEnemyDead_)
+      eFrames = BATTLE_ENEMY_FRAMES_DEATH;
+    else if (isEnemyHurt_)
+      eFrames = BATTLE_ENEMY_FRAMES_HURT;
+    else if (isEnemyAttacking_)
+      eFrames = BATTLE_ENEMY_FRAMES_ATTACK;
 
     enemyCurrentFrame_++;
     // Tahan frame terakhir kalau mati
@@ -185,13 +209,15 @@ void BattleScene::Draw() {
 
   DrawPlayer();
   DrawEnemy();
-  
+
   if (isProjectileActive_) {
     // Gambar Projectile terbang
-    Rectangle src = {0, 0, static_cast<float>(projectileTex_.width), static_cast<float>(projectileTex_.height)};
-    Rectangle dst = {projectileX_, projectileY_,
-                     static_cast<float>(projectileTex_.width) * BATTLE_PROJECTILE_SCALE,
-                     static_cast<float>(projectileTex_.height) * BATTLE_PROJECTILE_SCALE};
+    Rectangle src = {0, 0, static_cast<float>(projectileTex_.width),
+                     static_cast<float>(projectileTex_.height)};
+    Rectangle dst = {
+        projectileX_, projectileY_,
+        static_cast<float>(projectileTex_.width) * BATTLE_PROJECTILE_SCALE,
+        static_cast<float>(projectileTex_.height) * BATTLE_PROJECTILE_SCALE};
     DrawTexturePro(projectileTex_, src, dst, {0, 0}, 0.0f, WHITE);
   }
 
@@ -200,24 +226,26 @@ void BattleScene::Draw() {
 
 void BattleScene::DrawPlayer() {
   Texture2D tex = isPlayerAttacking_ ? playerAttackTex_ : playerIdleTex_;
-  int frames = isPlayerAttacking_ ? BATTLE_PLAYER_FRAMES_ATTACK : BATTLE_PLAYER_FRAMES_IDLE;
+  int frames = isPlayerAttacking_ ? BATTLE_PLAYER_FRAMES_ATTACK
+                                  : BATTLE_PLAYER_FRAMES_IDLE;
 
   float frameW = static_cast<float>(tex.width) / frames;
   float frameH = static_cast<float>(tex.height);
 
-  Rectangle src = {static_cast<float>(playerCurrentFrame_) * frameW, 0, frameW, frameH};
-  
+  Rectangle src = {static_cast<float>(playerCurrentFrame_) * frameW, 0, frameW,
+                   frameH};
+
   float drawW = frameW * BATTLE_PLAYER_SCALE;
   float drawH = frameH * BATTLE_PLAYER_SCALE;
   float posX = GetScreenWidth() * 0.3f - (drawW / 2.0f);
   float posY = GetScreenHeight() / 2.0f - (drawH / 2.0f);
-  
-  Rectangle dst = { posX, posY, drawW, drawH };
+
+  Rectangle dst = {posX, posY, drawW, drawH};
 
   DrawTexturePro(tex, src, dst, {0, 0}, 0.0f, WHITE);
-  
+
   // Health Bar Player (di bawah karakter)
-  DrawHealthBar(posX, posY + drawH + 10, playerHP_, playerMaxHP_);
+  DrawHealthBar(posX, posY + drawH + 10, Player_.hp, Player_.maxHp);
 }
 
 void BattleScene::DrawEnemy() {
@@ -245,20 +273,21 @@ void BattleScene::DrawEnemy() {
   float frameH = static_cast<float>(tex.height);
 
   // Flip horizontal dengan width negatif
-  Rectangle src = {static_cast<float>(enemyCurrentFrame_) * frameW, 0, -frameW, frameH};
-  
+  Rectangle src = {static_cast<float>(enemyCurrentFrame_) * frameW, 0, -frameW,
+                   frameH};
+
   float drawW = frameW * BATTLE_ENEMY_SCALE;
   float drawH = frameH * BATTLE_ENEMY_SCALE;
   float posX = GetScreenWidth() * 0.7f - (drawW / 2.0f);
   float posY = GetScreenHeight() / 2.0f - (drawH / 2.0f);
-  
-  Rectangle dst = { posX, posY, drawW, drawH };
+
+  Rectangle dst = {posX, posY, drawW, drawH};
 
   DrawTexturePro(tex, src, dst, {0, 0}, 0.0f, WHITE);
 
   // Health Bar Enemy
   if (!isEnemyDead_) {
-    DrawHealthBar(posX, posY + drawH + 10, enemyHP_, enemyMaxHP_);
+    DrawHealthBar(posX, posY + drawH + 10, Enemy_.hp, Enemy_.maxHp);
   }
 }
 
@@ -268,8 +297,9 @@ void BattleScene::DrawHealthBar(float x, float y, int currentHP, int maxHP) {
   float drawW = static_cast<float>(healthBgTex_.width) * scale;
   float drawH = static_cast<float>(healthBgTex_.height) * scale;
 
-  Rectangle src = {0, 0, static_cast<float>(healthBgTex_.width), static_cast<float>(healthBgTex_.height)};
-  Rectangle dst = { x, y, drawW, drawH };
+  Rectangle src = {0, 0, static_cast<float>(healthBgTex_.width),
+                   static_cast<float>(healthBgTex_.height)};
+  Rectangle dst = {x, y, drawW, drawH};
 
   // Draw Background
   DrawTexturePro(healthBgTex_, src, dst, {0, 0}, 0.0f, WHITE);
@@ -277,23 +307,33 @@ void BattleScene::DrawHealthBar(float x, float y, int currentHP, int maxHP) {
   // Draw Fill
   if (currentHP > 0) {
     int index = (currentHP * 10) / maxHP;
-    if (index < 1) index = 1;
-    if (index > 10) index = 10;
-    
+    if (index < 1)
+      index = 1;
+    if (index > 10)
+      index = 10;
+
     DrawTexturePro(healthFillTex_[index - 1], src, dst, {0, 0}, 0.0f, WHITE);
   }
 
   // Draw Text HP
-  DrawText(TextFormat("HP: %d/%d", currentHP, maxHP), x, y + drawH + 5, 20, RAYWHITE);
+  DrawText(TextFormat("HP: %d/%d", currentHP, maxHP), x, y + drawH + 5, 20,
+           RAYWHITE);
 }
 
 void BattleScene::DrawBattleUI() {
-  const char* text = "";
+  const char *text = "";
   switch (currentState_) {
-    case BattleState::Start: text = "BATTLE START!"; break;
-    case BattleState::Win: text = "YOU WIN!"; break;
-    case BattleState::Lose: text = "YOU LOSE!"; break;
-    default: break;
+  case BattleState::Start:
+    text = "BATTLE START!";
+    break;
+  case BattleState::Win:
+    text = "YOU WIN!";
+    break;
+  case BattleState::Lose:
+    text = "YOU LOSE!";
+    break;
+  default:
+    break;
   }
 
   if (text[0] != '\0') {
@@ -301,11 +341,22 @@ void BattleScene::DrawBattleUI() {
     DrawText(text, (GetScreenWidth() - w) / 2, 100, 40, YELLOW);
   }
 
-  // FUTURE: Draw manual buttons
-  // DrawAttackButton();
-  // DrawSkillButton();
-  // DrawItemButton();
-  // DrawRunButton();
+  if (currentState_ == BattleState::PlayerIsChoosing) {
+    int boxWidth = 400;
+    int boxHeight = 120;
+    int boxX = (GetScreenWidth() - boxWidth) / 2;
+    int boxY = GetScreenHeight() - boxHeight - 20;
+
+    DrawRectangle(boxX, boxY, boxWidth, boxHeight, Fade(BLACK, 0.8f));
+    DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, WHITE);
+
+    // Tulis teks pilihan
+    DrawText("Giliranmu!", boxX + 20, boxY + 15, 20, YELLOW);
+    DrawText("Tekan [1] untuk Serang (Attack)", boxX + 20, boxY + 50, 20,
+             WHITE);
+    DrawText("Tekan [2] untuk Sembuhkan (Heal)", boxX + 20, boxY + 80, 20,
+             WHITE);
+  }
 }
 
 void BattleScene::OnExit() {

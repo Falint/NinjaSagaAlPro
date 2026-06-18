@@ -75,8 +75,8 @@ SceneType MainMenuScene::Update(float dt) {
           std::cout << "[MainMenu] PLAY clicked -> Go to Battle" << std::endl;
           return SceneType::Gameplay;
         case MenuButton::Shop:
-          std::cout << "[MainMenu] SHOP clicked -> Go To Shop" << std::endl;
-          return SceneType::Shop;
+          std::cout << "[MainMenu] SHOP clicked -> Go To Academy" << std::endl;
+          return SceneType::Academy;
         case MenuButton::Inventory:
           std::cout << "[MainMenu] INVENTORY clicked -> Go To Inventory"
                     << std::endl;

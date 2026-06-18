@@ -139,3 +139,54 @@ constexpr int BATTLE_ANIM_FPS = 8;
 constexpr float BATTLE_STATE_DELAY = 2.0f; // Delay per turn state
 constexpr float BATTLE_END_DELAY =
     3.0f; // Delay saat win/lose sebelum kembali ke menu
+
+// -- Academy Scene Constants --
+constexpr float ACADEMY_BASE_W = 1280.0f;
+constexpr float ACADEMY_BASE_H = 720.0f;
+
+// Path 4 frame Academy (idle + 3 hover state)
+constexpr const char *ASSET_ACADEMY_FRAME_1 =
+    "assets/sprites/ui/skill/Academy1.png";
+constexpr const char *ASSET_ACADEMY_FRAME_2 =
+    "assets/sprites/ui/skill/Academy2.png";
+constexpr const char *ASSET_ACADEMY_FRAME_3 =
+    "assets/sprites/ui/skill/Academy3.png";
+constexpr const char *ASSET_ACADEMY_FRAME_4 =
+    "assets/sprites/ui/skill/Academy4.png";
+
+// Path icon skill
+constexpr const char *ASSET_SKILL_ICON_01 =
+    "assets/sprites/ui/skill/skill01.png";
+constexpr const char *ASSET_SKILL_ICON_02 =
+    "assets/sprites/ui/skill/skill02.png";
+constexpr const char *ASSET_SKILL_ICON_03 =
+    "assets/sprites/ui/skill/skill03.png";
+
+// Hitbox 3 baris skill di panel kiri (rasio terhadap 1280×720)
+// Format: { X_Ratio, Y_Ratio, Width_Ratio, Height_Ratio }
+constexpr int ACADEMY_SKILL_COUNT = 3;
+constexpr float ACADEMY_SKILL_HITBOXES[ACADEMY_SKILL_COUNT][4] = {
+    {0.14f, 0.31f, 0.22f, 0.09f}, // Skill 1 (Fire Slash)
+    {0.14f, 0.43f, 0.22f, 0.09f}, // Skill 2 (Ice Slash)
+    {0.14f, 0.55f, 0.22f, 0.09f}, // Skill 3 (Heal)
+};
+
+// Hitbox tombol X (close) kanan atas
+constexpr float ACADEMY_CLOSE_HITBOX[4] = {0.83f, 0.20f, 0.04f, 0.06f};
+
+// Panel detail kanan (tempat render preview skill)
+constexpr float ACADEMY_DETAIL_X = 0.63f;
+constexpr float ACADEMY_DETAIL_Y = 0.27f;
+constexpr float ACADEMY_DETAIL_W = 0.07f;
+constexpr float ACADEMY_DETAIL_H = 0.15f;
+
+// 5 slot skill yang dimiliki player (kanan bawah)
+constexpr int ACADEMY_OWNED_SLOT_COUNT = 5;
+constexpr float ACADEMY_OWNED_SLOTS_X = 0.62f;   // X awal slot pertama
+constexpr float ACADEMY_OWNED_SLOTS_Y = 0.63f;   // Y slot
+constexpr float ACADEMY_OWNED_SLOT_W = 0.045f;   // Lebar tiap slot
+constexpr float ACADEMY_OWNED_SLOT_H = 0.07f;    // Tinggi tiap slot
+constexpr float ACADEMY_OWNED_SLOT_GAP = 0.005f; // Jarak antar slot
+
+// Debug flag
+constexpr bool ACADEMY_DEBUG_HITBOX = true;

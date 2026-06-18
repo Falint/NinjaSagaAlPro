@@ -19,6 +19,11 @@ struct Skill {
   int healAmount = 0;     // Untuk skill heal
   SkillTarget target = SkillTarget::SingleEnemy;
 
+  // -- Fields untuk Academy Shop --
+  int price = 0;                // Harga beli (dalam Gold)
+  bool owned = false;           // Apakah sudah dibeli?
+  const char *iconPath = "";    // Path ke file icon PNG
+
   // Cek apakah skill bisa dipakai (cukup mana?)
   bool CanUse(int currentMana) const { return currentMana >= manaCost; }
 };

@@ -1,10 +1,12 @@
 #pragma once
 #include "core/BaseScene.h"
+#include "entities/Character.h"
 #include "raylib.h"
 #include "types.h"
 
 enum class BattleState {
   Start,
+  PlayerIsChoosing,
   PlayerTurn,
   EnemyTurn,
   Win,
@@ -45,10 +47,12 @@ private:
   float stateTimer_ = 0.0f;
 
   // Karakter Stats
-  int playerHP_ = 0;
-  int playerMaxHP_ = 0;
-  int enemyHP_ = 0;
-  int enemyMaxHP_ = 0;
+  // int playerHP_ = 0;
+  // int playerMaxHP_ = 0;
+  // int enemyHP_ = 0;
+  // int enemyMaxHP_ = 0;
+  Character Player_;
+  Character Enemy_;
 
   // Animation System Player
   int playerCurrentFrame_ = 0;

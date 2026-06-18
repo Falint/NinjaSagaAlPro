@@ -7,10 +7,13 @@ enum class SceneType {
   MainMenu,
   Gameplay,
   Inventory,
-  Shop,
+  Academy,
   Exit
 };
 
+// Forward declaration — definisi lengkap di entities/Character.h
+struct Character;
+
 struct GameContext {
-  // Add any global game state or configurations here later.
+  Character *player = nullptr; // Pointer ke player global (dibuat di main.cpp)
 };

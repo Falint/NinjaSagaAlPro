@@ -2,7 +2,7 @@
 #include "scenes/MainMenuScene.h"
 #include "scenes/SplashScene.h"
 #include "scenes/InventoryScene.h"
-#include "scenes/ShopScene.h"
+#include "scenes/AcademyScene.h"
 #include "scenes/BattleScene.h"
 #include "types.h"
 #include <memory>
@@ -38,8 +38,8 @@ void SceneManager::ChangeScene(SceneType type) {
   case SceneType::Gameplay:
     activeScene_ = std::make_unique<BattleScene>(context_);
     break;
-  case SceneType::Shop:
-    activeScene_ = std::make_unique<ShopScene>(context_);
+  case SceneType::Academy:
+    activeScene_ = std::make_unique<AcademyScene>(context_);
     break;
   default:
     break;
