@@ -54,7 +54,7 @@ constexpr float INV_CHAR_SCALE =
 constexpr float INV_CHAR_OFFSET_X =
     0.0f; // Jarak geser horizontal (0 = tepat di tengah)
 constexpr float INV_CHAR_OFFSET_Y =
-    -100.0f; // Jarak karakter dari atas UI inventory
+    -90.0f; // Jarak karakter dari atas UI inventory
 
 // gampang kalibrasi posisi
 constexpr bool INV_CHAR_DEBUG_HITBOX = false;
@@ -81,15 +81,15 @@ constexpr bool MENU_DEBUG_HITBOX = false;
 // Format: { X_Ratio, Y_Ratio, Width_Ratio, Height_Ratio }
 // Setiap slot bisa diubah sendiri tanpa mempengaruhi slot lain
 constexpr float INV_SLOT_HITBOXES[INV_SLOT_COUNT][4] = {
-    {0.38f, 0.28f, 0.74f, 0.77f}, // Slot 0 (kiri atas)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 1 (tengah atas)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 2 (kanan atas)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 3 (kiri tengah)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 4 (tengah)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 5 (kanan tengah)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 6 (kiri bawah)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 7 (tengah bawah)
-    {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 8 (kanan bawah)
+    {0.27f, 0.25f, 0.74f, 0.78f}, // Slot 0 (kiri atas)
+    {0.13f, 0.25f, 0.74f, 0.78f}, // Slot 1 (tengah atas)
+    {-0.01f, 0.25f, 0.74f, 0.78f}, // Slot 2 (kanan atas)
+    {0.27f, 0.12f, 0.74f, 0.77f}, // Slot 3 (kiri tengah)
+    {0.13f, 0.12f, 0.74f, 0.77f}, // Slot 4 (tengah)
+    {-0.01f, 0.12f, 0.74f, 0.77f}, // Slot 5 (kanan tengah)
+    {0.27f, -0.03f, 0.74f, 0.77f}, // Slot 6 (kiri bawah)
+    {0.13f, -0.03f, 0.74f, 0.77f}, // Slot 7 (tengah bawah)
+    {-0.01f, -0.03f, 0.74f, 0.77f}, // Slot 8 (kanan bawah)
 };
 
 //===============================================
