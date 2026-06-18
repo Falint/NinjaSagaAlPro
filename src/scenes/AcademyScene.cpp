@@ -214,8 +214,8 @@ void AcademyScene::Draw() {
     float detY = layout.imgY + (ACADEMY_DETAIL_Y * layout.drawH);
     float detW = ACADEMY_DETAIL_W * layout.drawW;
 
-    // Skala icon (60×54 asli, diperbesar 2x)
-    float iconScale = layout.drawW / ACADEMY_BASE_W * 2.0f;
+    // Skala icon (60×54 asli, diperbesar menggunakan ACADEMY_ICON_SCALE)
+    float iconScale = layout.drawW / ACADEMY_BASE_W * ACADEMY_ICON_SCALE;
     float iconW = 60.0f * iconScale;
     float iconH = 54.0f * iconScale;
 
@@ -232,7 +232,7 @@ void AcademyScene::Draw() {
     }
 
     // Nama skill
-    int fontSize = static_cast<int>(layout.drawH * 0.03f);
+    int fontSize = static_cast<int>(layout.drawH * ACADEMY_FONT_SCALE);
     if (fontSize < 12) fontSize = 12;
     float textStartY = detY + iconH + 20.0f;
     int nameW = MeasureText(skill.name.c_str(), fontSize + 4);

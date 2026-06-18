@@ -177,8 +177,16 @@ constexpr float ACADEMY_CLOSE_HITBOX[4] = {0.83f, 0.20f, 0.04f, 0.06f};
 // Panel detail kanan (tempat render preview skill)
 constexpr float ACADEMY_DETAIL_X = 0.63f;
 constexpr float ACADEMY_DETAIL_Y = 0.27f;
-constexpr float ACADEMY_DETAIL_W = 0.07f;
-constexpr float ACADEMY_DETAIL_H = 0.15f;
+constexpr float ACADEMY_DETAIL_W = 0.20f;
+constexpr float ACADEMY_DETAIL_H = 0.45f;
+
+// Ukuran icon skill di panel preview (pengali dari ukuran asli 60x54)
+// Semakin besar = icon semakin besar. Default: 2.0f
+constexpr float ACADEMY_ICON_SCALE = 1.3f;
+
+// Ukuran font di panel preview (pengali dari tinggi layar)
+// Semakin besar = teks semakin besar. Default: 0.03f
+constexpr float ACADEMY_FONT_SCALE = 0.02f;
 
 // 5 slot skill yang dimiliki player (kanan bawah)
 constexpr int ACADEMY_OWNED_SLOT_COUNT = 5;
