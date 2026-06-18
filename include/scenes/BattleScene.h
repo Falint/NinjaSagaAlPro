@@ -59,6 +59,15 @@ private:
   int playerFrameCounter_ = 0;
   bool isPlayerAttacking_ = false;
 
+  // Dash System Player
+  enum class DashState { Idle, DashingToEnemy, Attacking, DashingBack };
+  DashState dashState_ = DashState::Idle;
+  float playerPosX_ = 0.0f;     // posisi X player saat ini (screen space)
+  float playerOriginX_ = 0.0f;  // posisi X asal player
+  float playerTargetX_ = 0.0f;  // posisi X tujuan dash (dekat enemy)
+  float dashTimer_ = 0.0f;      // timer untuk lerp dash
+  float dashDuration_ = 0.2f;   // durasi dash (detik)
+
   // Animation System Enemy
   int enemyCurrentFrame_ = 0;
   int enemyFrameCounter_ = 0;

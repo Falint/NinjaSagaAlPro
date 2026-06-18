@@ -53,6 +53,11 @@ void BattleScene::OnEnter() {
   projectileX_ = 0.0f;
   projectileY_ = 0.0f;
 
+  // Init Dash State
+  dashState_ = DashState::Idle;
+  dashTimer_ = 0.0f;
+  // playerPosX_ diinisialisasi saat pertama kali draw, karena butuh screen width
+
   std::cout << "[BattleScene] Battle Start!" << std::endl;
 }
 
@@ -72,9 +77,18 @@ SceneType BattleScene::Update(float dt) {
     if (IsKeyPressed(KEY_ONE)) {
       std::cout << "[Battle] Player Pilih attack!\n";
 
-      Enemy_.TakeDamage(Player_.attack);
+      // Mulai dash ke enemy, damage diberikan nanti saat sudah sampai
+      float screenW = static_cast<float>(GetScreenWidth());
+      float frameW = static_cast<float>(playerIdleTex_.width) / BATTLE_PLAYER_FRAMES_IDLE;
+      float drawW = frameW * BATTLE_PLAYER_SCALE;
+      playerOriginX_ = screenW * 0.3f - (drawW / 2.0f);
+      playerPosX_    = playerOriginX_;
+      playerTargetX_ = screenW * 0.7f - drawW * 1.5f; // tepat di depan enemy
 
-      isPlayerAttacking_ = true;
+      dashState_ = DashState::DashingToEnemy;
+      dashTimer_ = 0.0f;
+
+      isPlayerAttacking_ = false;
       playerCurrentFrame_ = 0;
       playerFrameCounter_ = 0;
 
@@ -88,32 +102,68 @@ SceneType BattleScene::Update(float dt) {
     break;
 
   case BattleState::PlayerTurn:
-    // FUTURE:
-    // if (selectedAction == BattleAction::Attack)
-    // {
-    //     isPlayerAttacking_ = true;
-    //     playerCurrentFrame_ = 0;
-    //     // Lanjut ke logika serang
-    // }
+    dashTimer_ += dt;
 
-    // Logic saat player nyerang otomatis
-    if (stateTimer_ >= BATTLE_STATE_DELAY) {
-      std::cout << "Player Attack Animation Finished!" << std::endl;
+    if (dashState_ == DashState::DashingToEnemy) {
+      // Lerp player dari origin ke target
+      float t = dashTimer_ / dashDuration_;
+      if (t >= 1.0f) {
+        t = 1.0f;
+        playerPosX_ = playerTargetX_;
 
-      isPlayerAttacking_ = false;
-      isEnemyHurt_ = true;
-      enemyCurrentFrame_ = 0;
+        // Sudah sampai — play animasi attack dan berikan damage
+        dashState_ = DashState::Attacking;
+        dashTimer_ = 0.0f;
 
-      stateTimer_ = 0.0f;
-      if (!Enemy_.IsAlive()) {
-        currentState_ = BattleState::Win;
-        isEnemyDead_ = true;
+        isPlayerAttacking_ = true;
+        playerCurrentFrame_ = 0;
+        playerFrameCounter_ = 0;
+
+        Enemy_.TakeDamage(Player_.attack);
+        isEnemyHurt_ = true;
         enemyCurrentFrame_ = 0;
-        std::cout << "You Win!" << std::endl;
       } else {
+        playerPosX_ = playerOriginX_ + (playerTargetX_ - playerOriginX_) * t;
+      }
+
+    } else if (dashState_ == DashState::Attacking) {
+      // Tunggu animasi attack selesai (gunakan BATTLE_STATE_DELAY)
+      if (dashTimer_ >= BATTLE_STATE_DELAY) {
+        isPlayerAttacking_ = false;
+        isEnemyHurt_ = false;
+
+        // Cek apakah enemy mati
+        if (!Enemy_.IsAlive()) {
+          std::cout << "You Win!" << std::endl;
+          dashState_ = DashState::Idle;
+          playerPosX_ = playerOriginX_;
+          currentState_ = BattleState::Win;
+          isEnemyDead_ = true;
+          enemyCurrentFrame_ = 0;
+          stateTimer_ = 0.0f;
+        } else {
+          // Dash balik ke posisi asal
+          dashState_ = DashState::DashingBack;
+          dashTimer_ = 0.0f;
+        }
+      }
+
+    } else if (dashState_ == DashState::DashingBack) {
+      // Lerp player dari target kembali ke origin
+      float t = dashTimer_ / dashDuration_;
+      if (t >= 1.0f) {
+        t = 1.0f;
+        playerPosX_ = playerOriginX_;
+        dashState_ = DashState::Idle;
+
+        // Selesai semua — sekarang giliran enemy
+        std::cout << "Player Attack Animation Finished!" << std::endl;
         currentState_ = BattleState::EnemyTurn;
         isEnemyAttacking_ = true;
-        enemyCurrentFrame_ = 0; // Reset animasi attack musuh
+        enemyCurrentFrame_ = 0;
+        stateTimer_ = 0.0f;
+      } else {
+        playerPosX_ = playerTargetX_ + (playerOriginX_ - playerTargetX_) * t;
       }
     }
     break;
@@ -136,8 +186,7 @@ SceneType BattleScene::Update(float dt) {
         std::cout << "You Lose!" << std::endl;
       } else {
         currentState_ = BattleState::PlayerIsChoosing;
-        isPlayerAttacking_ = true;
-        playerCurrentFrame_ = 0;
+        isPlayerAttacking_ = false; // Kembali ke idle, tunggu input user
       }
     } else {
       // Setup Projectile logika dasar jika animasi musuh menyerang
@@ -237,7 +286,11 @@ void BattleScene::DrawPlayer() {
 
   float drawW = frameW * BATTLE_PLAYER_SCALE;
   float drawH = frameH * BATTLE_PLAYER_SCALE;
-  float posX = GetScreenWidth() * 0.3f - (drawW / 2.0f);
+
+  // Gunakan playerPosX_ jika sedang dash, otherwise posisi default
+  float posX = (dashState_ != DashState::Idle)
+                   ? playerPosX_
+                   : GetScreenWidth() * 0.3f - (drawW / 2.0f);
   float posY = GetScreenHeight() / 2.0f - (drawH / 2.0f);
 
   Rectangle dst = {posX, posY, drawW, drawH};
