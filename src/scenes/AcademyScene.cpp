@@ -49,7 +49,7 @@ void AcademyScene::OnEnter() {
   shopSkills_ = {
       {1,
        "Fire Slash",
-       "Menghantam musuh dengan pedang\nyang dilapisi api.\nDamage +2.",
+       "Menghantam musuh dengan\npedang yang dilapisi api.\nDamage +2.",
        3,  // manaCost
        2,  // baseDamage
        0,  // healAmount

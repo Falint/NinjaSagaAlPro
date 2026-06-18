@@ -1,6 +1,8 @@
 #pragma once
 
+//===============================================
 // -- Splash Scene Constants --
+//===============================================
 constexpr float SPLASH_FADE_IN_DURATION = 1.0f;
 constexpr float SPLASH_HOLD_DURATION = 2.0f;
 constexpr float SPLASH_FADE_OUT_DURATION = 1.0f;
@@ -8,8 +10,10 @@ constexpr float SPLASH_TOTAL_DURATION =
     SPLASH_FADE_IN_DURATION + SPLASH_HOLD_DURATION + SPLASH_FADE_OUT_DURATION;
 constexpr int SPLASH_TITLE_FONT_SIZE = 80;
 
+
+//===============================================
 // -- Main Menu Scene Constants --
-// -- Main Menu Scene Constants --
+//===============================================
 // Asumsi resolusi asli pixel art menu adalah 200x200
 constexpr float MENU_BASE_SIZE = 200.0f;
 
@@ -36,7 +40,9 @@ constexpr float MENU_HITBOXES[BUTTON_COUNT][4] = {
     {0.30f, 0.61f, 0.3f, 0.05f}, // EXIT
 };
 
+//===============================================
 // -- Inventory Scene Constants --
+//===============================================
 constexpr const char *ASSET_INVENTORY_FRAME = "assets/sprites/ui/Inv.png";
 constexpr const char *ASSET_INVENTORY_HITBOX =
     "assets/sprites/ui/Inv_hitbox.png";
@@ -86,8 +92,9 @@ constexpr float INV_SLOT_HITBOXES[INV_SLOT_COUNT][4] = {
     {0.28f, 0.28f, 0.74f, 0.77f}, // Slot 8 (kanan bawah)
 };
 
+//===============================================
 // -- Battle Scene Constants --
-
+//===============================================
 // Assets Player
 constexpr const char *ASSET_BATTLE_PLAYER_IDLE =
     "assets/sprites/ui/Player/man/idle.png";
@@ -140,7 +147,9 @@ constexpr float BATTLE_STATE_DELAY = 2.0f; // Delay per turn state
 constexpr float BATTLE_END_DELAY =
     3.0f; // Delay saat win/lose sebelum kembali ke menu
 
-// -- Academy Scene Constants --
+//===============================================   
+// -- Academy(Shop) Scene Constants --
+//===============================================
 constexpr float ACADEMY_BASE_W = 1280.0f;
 constexpr float ACADEMY_BASE_H = 720.0f;
 
@@ -166,13 +175,13 @@ constexpr const char *ASSET_SKILL_ICON_03 =
 // Format: { X_Ratio, Y_Ratio, Width_Ratio, Height_Ratio }
 constexpr int ACADEMY_SKILL_COUNT = 3;
 constexpr float ACADEMY_SKILL_HITBOXES[ACADEMY_SKILL_COUNT][4] = {
-    {0.14f, 0.31f, 0.22f, 0.09f}, // Skill 1 (Fire Slash)
-    {0.14f, 0.43f, 0.22f, 0.09f}, // Skill 2 (Ice Slash)
-    {0.14f, 0.55f, 0.22f, 0.09f}, // Skill 3 (Heal)
+    {0.1688f, 0.3319f, 0.1953f, 0.0917f},  // skill 1 fire
+    {0.1688f, 0.4278f, 0.1953f, 0.0917f},  // skill 2 ice
+    {0.1688f, 0.5236f, 0.1953f, 0.0917f},  // skill 3 heal
 };
 
 // Hitbox tombol X (close) kanan atas
-constexpr float ACADEMY_CLOSE_HITBOX[4] = {0.83f, 0.20f, 0.04f, 0.06f};
+constexpr float ACADEMY_CLOSE_HITBOX[4] = {0.8203f, 0.1778f, 0.0523f, 0.0792f};
 
 // Panel detail kanan (tempat render preview skill)
 constexpr float ACADEMY_DETAIL_X = 0.63f;
@@ -186,15 +195,15 @@ constexpr float ACADEMY_ICON_SCALE = 1.3f;
 
 // Ukuran font di panel preview (pengali dari tinggi layar)
 // Semakin besar = teks semakin besar. Default: 0.03f
-constexpr float ACADEMY_FONT_SCALE = 0.02f;
+constexpr float ACADEMY_FONT_SCALE = 0.03f;
 
 // 5 slot skill yang dimiliki player (kanan bawah)
 constexpr int ACADEMY_OWNED_SLOT_COUNT = 5;
-constexpr float ACADEMY_OWNED_SLOTS_X = 0.62f;   // X awal slot pertama
-constexpr float ACADEMY_OWNED_SLOTS_Y = 0.63f;   // Y slot
-constexpr float ACADEMY_OWNED_SLOT_W = 0.045f;   // Lebar tiap slot
-constexpr float ACADEMY_OWNED_SLOT_H = 0.07f;    // Tinggi tiap slot
-constexpr float ACADEMY_OWNED_SLOT_GAP = 0.005f; // Jarak antar slot
+constexpr float ACADEMY_OWNED_SLOTS_X = 0.607f;   // X awal slot pertama
+constexpr float ACADEMY_OWNED_SLOTS_Y = 0.624f;   // Y slot
+constexpr float ACADEMY_OWNED_SLOT_W = 0.04605f;   // Lebar tiap slot
+constexpr float ACADEMY_OWNED_SLOT_H = 0.08f;    // Tinggi tiap slot
+constexpr float ACADEMY_OWNED_SLOT_GAP = 0.0035f; // Jarak antar slot
 
 // Debug flag
-constexpr bool ACADEMY_DEBUG_HITBOX = true;
+constexpr bool ACADEMY_DEBUG_HITBOX = false;
