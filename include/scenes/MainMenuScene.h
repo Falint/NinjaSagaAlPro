@@ -25,6 +25,7 @@ public:
 private:
   // Hitung layout menu berdasarkan ukuran layar saat ini
   MenuLayout CalcLayout() const;
+  Texture2D menuBackgroundTex_ = {};
 
   GameContext context_;
   Texture2D menuFrames_[6] = {};

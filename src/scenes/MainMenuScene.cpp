@@ -33,6 +33,8 @@ void MainMenuScene::OnEnter() {
   menuFrames_[4] = LoadTexture(ASSET_MENU_FRAME_5);
   menuFrames_[5] = LoadTexture(ASSET_MENU_FRAME_6);
 
+  menuBackgroundTex_ = LoadTexture(ASSET_MENU_BACKGROUND);
+
   for (int i = 0; i < 6; i++) {
     if (menuFrames_[i].id == 0) {
       std::cerr << "[ERROR] Gagal load texture frame index: " << i << std::endl;
@@ -105,6 +107,15 @@ void MainMenuScene::Draw() {
   // Draw HANYA SATU gambar fullscreen
   Texture2D texToDraw = menuFrames_[currentFrameIndex_];
 
+  if (menuBackgroundTex_.id != 0) {
+        DrawTexturePro(menuBackgroundTex_, 
+                       {0.0f, 0.0f, static_cast<float>(menuBackgroundTex_.width), static_cast<float>(menuBackgroundTex_.height)}, 
+                       {0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, 
+                       {0.0f, 0.0f}, 0.0f, WHITE);
+    } else {
+        ClearBackground(BLACK);
+    }
+
   // ── Hitung layout menggunakan helper terpusat ──
   MenuLayout layout = CalcLayout();
 
@@ -151,4 +162,9 @@ void MainMenuScene::OnExit() {
       menuFrames_[i] = {};
     }
   }
+
+  if (menuBackgroundTex_.id != 0) {
+        UnloadTexture(menuBackgroundTex_);
+        menuBackgroundTex_ = {};
+    }
 }
