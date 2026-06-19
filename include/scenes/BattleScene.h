@@ -83,10 +83,13 @@ private:
   float projectileX_ = 0.0f;
   float projectileY_ = 0.0f;
 
+  int activeSkillIndex_ = -1; // -1 = basic attack
+
   // Helpers
   void DrawPlayer();
   void DrawEnemy();
   void DrawHealthBar(float x, float y, int currentHP, int maxHP);
+  void DrawManaBar(float x, float y, int currentMP, int maxMP);
   void DrawBattleUI();
   void UpdateAnimations();
 };

@@ -1,5 +1,6 @@
 #include "scenes/InventoryScene.h"
 #include "constants.h"
+#include "entities/Character.h"
 #include "raylib.h"
 #include <algorithm>
 #include <iostream>
@@ -73,6 +74,10 @@ void InventoryScene::OnEnter() {
     std::cerr << "[ERROR] Gagal load texture: " << ASSET_BTN_KEMBALI
               << std::endl;
   }
+
+  skillIcons_[0] = LoadTexture(ASSET_SKILL_ICON_01);
+  skillIcons_[1] = LoadTexture(ASSET_SKILL_ICON_02);
+  skillIcons_[2] = LoadTexture(ASSET_SKILL_ICON_03);
 }
 
 SceneType InventoryScene::Update(float dt) {
@@ -152,6 +157,32 @@ void InventoryScene::Draw() {
                        layout.drawSize};
 
   DrawTexturePro(invTexture_, srcRect, dstRect, {0, 0}, 0.0f, WHITE);
+
+  // ── 1.5. Draw Player Skills in the Grid ──
+  if (context_.player) {
+    for (size_t i = 0; i < context_.player->skills.size() && i < INV_SLOT_COUNT; i++) {
+      const auto &skill = context_.player->skills[i];
+      int col = i % INV_GRID_COLS;
+      int row = i / INV_GRID_COLS;
+
+      float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
+      float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
+
+      float hx = cellX + (INV_SLOT_HITBOXES[i][0] * layout.cellW);
+      float hy = cellY + (INV_SLOT_HITBOXES[i][1] * layout.cellH);
+      float hw = INV_SLOT_HITBOXES[i][2] * layout.cellW;
+      float hh = INV_SLOT_HITBOXES[i][3] * layout.cellH;
+
+      Rectangle slotDst = {hx, hy, hw, hh};
+
+      int iconIndex = skill.id - 1;
+      if (iconIndex >= 0 && iconIndex < 3 && skillIcons_[iconIndex].id != 0) {
+        Rectangle iconSrc = {0, 0, static_cast<float>(skillIcons_[iconIndex].width),
+                             static_cast<float>(skillIcons_[iconIndex].height)};
+        DrawTexturePro(skillIcons_[iconIndex], iconSrc, slotDst, {0, 0}, 0.0f, WHITE);
+      }
+    }
+  }
 
   // ── 2. Draw Inv_hitbox.png di atas slot yang di-hover ──
   if (hoveredSlot_ >= 0 && hoveredSlot_ < INV_SLOT_COUNT) {
@@ -252,8 +283,23 @@ void InventoryScene::Draw() {
 
   // ── Info text ──
   if (hoveredSlot_ >= 0) {
-    const char *slotText = TextFormat("Hover: Slot %d", hoveredSlot_);
-    DrawText(slotText, 20, 50, 20, GREEN);
+    if (context_.player && hoveredSlot_ < static_cast<int>(context_.player->skills.size())) {
+      const auto &skill = context_.player->skills[hoveredSlot_];
+      
+      int panelX = 20;
+      int panelY = 40;
+      int panelW = 350;
+      int panelH = 120;
+      DrawRectangle(panelX, panelY, panelW, panelH, Fade(BLACK, 0.8f));
+      DrawRectangleLines(panelX, panelY, panelW, panelH, GOLD);
+      
+      DrawText(skill.name.c_str(), panelX + 15, panelY + 15, 22, YELLOW);
+      DrawText(TextFormat("Chakra Cost: %d | Power: %d", skill.manaCost, skill.baseDamage > 0 ? skill.baseDamage : skill.healAmount), panelX + 15, panelY + 45, 16, SKYBLUE);
+      DrawText(skill.description.c_str(), panelX + 15, panelY + 75, 14, LIGHTGRAY);
+    } else {
+      const char *slotText = TextFormat("Hover: Slot %d (Kosong)", hoveredSlot_);
+      DrawText(slotText, 20, 50, 20, GREEN);
+    }
   }
   
   // Draw tombol kembali
@@ -293,6 +339,12 @@ void InventoryScene::OnExit() {
   if (charTexture_.id != 0) {
     UnloadTexture(charTexture_);
     charTexture_ = {};
+  }
+  for (int i = 0; i < 3; i++) {
+    if (skillIcons_[i].id != 0) {
+      UnloadTexture(skillIcons_[i]);
+      skillIcons_[i] = {};
+    }
   }
   hoveredSlot_ = -1;
   charCurrentFrame_ = 0;

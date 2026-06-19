@@ -30,9 +30,19 @@ void BattleScene::OnEnter() {
   }
 
   // Init Stats
-  Player_.maxHp = BATTLE_PLAYER_MAX_HP;
-  Player_.hp = Player_.maxHp;
-  Player_.attack = 2;
+  if (context_.player) {
+    Player_ = *context_.player;
+    // Mulai battle dengan HP & MP penuh sesuai maxHp & maxMp
+    Player_.hp = Player_.maxHp;
+    Player_.mp = Player_.maxMp;
+  } else {
+    Player_.maxHp = BATTLE_PLAYER_MAX_HP;
+    Player_.hp = Player_.maxHp;
+    Player_.maxMp = 10;
+    Player_.mp = 10;
+    Player_.attack = 2;
+  }
+  activeSkillIndex_ = -1;
 
   Enemy_.maxHp = BATTLE_PLAYER_MAX_HP;
   Enemy_.hp = Enemy_.maxHp;
@@ -99,10 +109,53 @@ SceneType BattleScene::Update(float dt) {
       currentState_ = BattleState::PlayerTurn;
       stateTimer_ = 0.0f;
     }
-    // if (IsKeyPressed()) {  // template buat tambahan interaksi apa yang bisa
-    // player buat
-    //
-    // }
+
+    for (size_t i = 0; i < Player_.skills.size(); ++i) {
+      if (IsKeyPressed(static_cast<KeyboardKey>(KEY_TWO + i))) {
+        const auto &skill = Player_.skills[i];
+
+        // Jika skill memiliki efek heal dan darah player sudah penuh, batalkan penggunaan skill
+        if (skill.healAmount > 0 && Player_.hp >= Player_.maxHp) {
+          std::cout << "[Battle] Darah sudah penuh! Gagal menggunakan " << skill.name << ".\n";
+          continue;
+        }
+
+        if (Player_.UseMana(skill.manaCost)) {
+          std::cout << "[Battle] Player Menggunakan skill: " << skill.name << "\n";
+          activeSkillIndex_ = static_cast<int>(i);
+
+          if (skill.target == SkillTarget::Self) {
+            // Self target skill (Heal)
+            Player_.Heal(skill.healAmount);
+            std::cout << "[Battle] Player heal " << skill.healAmount << " HP. HP: " << Player_.hp << "\n";
+            currentState_ = BattleState::EnemyTurn;
+            isEnemyAttacking_ = true;
+            enemyCurrentFrame_ = 0;
+            stateTimer_ = 0.0f;
+          } else {
+            // Offense skill
+            float screenW = static_cast<float>(GetScreenWidth());
+            float frameW = static_cast<float>(playerIdleTex_.width) / BATTLE_PLAYER_FRAMES_IDLE;
+            float drawW = frameW * BATTLE_PLAYER_SCALE;
+            playerOriginX_ = screenW * 0.3f - (drawW / 2.0f);
+            playerPosX_    = playerOriginX_;
+            playerTargetX_ = screenW * 0.7f - drawW * 1.5f;
+
+            dashState_ = DashState::DashingToEnemy;
+            dashTimer_ = 0.0f;
+
+            isPlayerAttacking_ = false;
+            playerCurrentFrame_ = 0;
+            playerFrameCounter_ = 0;
+
+            currentState_ = BattleState::PlayerTurn;
+            stateTimer_ = 0.0f;
+          }
+        } else {
+          std::cout << "[Battle] Mana tidak cukup untuk: " << skill.name << "!\n";
+        }
+      }
+    }
     break;
 
   case BattleState::PlayerTurn:
@@ -123,7 +176,13 @@ SceneType BattleScene::Update(float dt) {
         playerCurrentFrame_ = 0;
         playerFrameCounter_ = 0;
 
-        Enemy_.TakeDamage(Player_.attack);
+        if (activeSkillIndex_ >= 0 && activeSkillIndex_ < static_cast<int>(Player_.skills.size())) {
+          int damage = Player_.attack + Player_.skills[activeSkillIndex_].baseDamage;
+          Enemy_.TakeDamage(damage);
+          activeSkillIndex_ = -1; // reset
+        } else {
+          Enemy_.TakeDamage(Player_.attack);
+        }
         isEnemyHurt_ = true;
         enemyCurrentFrame_ = 0;
       } else {
@@ -308,8 +367,10 @@ void BattleScene::DrawPlayer() {
 
   DrawTexturePro(tex, src, dst, {0, 0}, 0.0f, WHITE);
 
-  // Health Bar Player (di bawah karakter)
-  DrawHealthBar(posX, posY + drawH + 10, Player_.hp, Player_.maxHp);
+  // Health Bar & Mana Bar Player (di bawah karakter, centered)
+  float barX = posX + (drawW - 160.0f) / 2.0f;
+  DrawHealthBar(barX, posY + drawH + 10, Player_.hp, Player_.maxHp);
+  DrawManaBar(barX, posY + drawH + 35, Player_.mp, Player_.maxMp);
 }
 
 void BattleScene::DrawEnemy() {
@@ -351,37 +412,55 @@ void BattleScene::DrawEnemy() {
 
   // Health Bar Enemy
   if (!isEnemyDead_) {
-    DrawHealthBar(posX, posY + drawH + 10, Enemy_.hp, Enemy_.maxHp);
+    float barX = posX + (drawW - 160.0f) / 2.0f;
+    DrawHealthBar(barX, posY + drawH + 10, Enemy_.hp, Enemy_.maxHp);
   }
 }
 
 void BattleScene::DrawHealthBar(float x, float y, int currentHP, int maxHP) {
-  // Option A: Gunakan RedMeter Sprite
-  float scale = 2.0f;
-  float drawW = static_cast<float>(healthBgTex_.width) * scale;
-  float drawH = static_cast<float>(healthBgTex_.height) * scale;
-
-  Rectangle src = {0, 0, static_cast<float>(healthBgTex_.width),
-                   static_cast<float>(healthBgTex_.height)};
-  Rectangle dst = {x, y, drawW, drawH};
+  float barW = 160.0f;
+  float barH = 20.0f;
 
   // Draw Background
-  DrawTexturePro(healthBgTex_, src, dst, {0, 0}, 0.0f, WHITE);
+  DrawRectangle(x, y, barW, barH, Color{40, 40, 40, 220});
 
   // Draw Fill
   if (currentHP > 0) {
-    int index = (currentHP * 10) / maxHP;
-    if (index < 1)
-      index = 1;
-    if (index > 10)
-      index = 10;
-
-    DrawTexturePro(healthFillTex_[index - 1], src, dst, {0, 0}, 0.0f, WHITE);
+    float ratio = static_cast<float>(currentHP) / static_cast<float>(maxHP);
+    if (ratio > 1.0f) ratio = 1.0f;
+    DrawRectangle(x, y, barW * ratio, barH, RED);
   }
 
-  // Draw Text HP
-  DrawText(TextFormat("HP: %d/%d", currentHP, maxHP), x, y + drawH + 5, 20,
-           RAYWHITE);
+  // Draw Border
+  DrawRectangleLinesEx({x, y, barW, barH}, 1.5f, LIGHTGRAY);
+
+  // Draw HP Text
+  std::string text = "HP: " + std::to_string(currentHP) + "/" + std::to_string(maxHP);
+  int textWidth = MeasureText(text.c_str(), 12);
+  DrawText(text.c_str(), x + (barW - textWidth) / 2.0f, y + (barH - 12) / 2.0f, 12, WHITE);
+}
+
+void BattleScene::DrawManaBar(float x, float y, int currentMP, int maxMP) {
+  float barW = 160.0f;
+  float barH = 20.0f;
+
+  // Draw Background
+  DrawRectangle(x, y, barW, barH, Color{40, 40, 40, 220});
+
+  // Draw Fill
+  if (currentMP > 0) {
+    float ratio = static_cast<float>(currentMP) / static_cast<float>(maxMP);
+    if (ratio > 1.0f) ratio = 1.0f;
+    DrawRectangle(x, y, barW * ratio, barH, SKYBLUE);
+  }
+
+  // Draw Border
+  DrawRectangleLinesEx({x, y, barW, barH}, 1.5f, LIGHTGRAY);
+
+  // Draw MP Text
+  std::string text = "MP: " + std::to_string(currentMP) + "/" + std::to_string(maxMP);
+  int textWidth = MeasureText(text.c_str(), 12);
+  DrawText(text.c_str(), x + (barW - textWidth) / 2.0f, y + (barH - 12) / 2.0f, 12, WHITE);
 }
 
 void BattleScene::DrawBattleUI() {
@@ -406,20 +485,24 @@ void BattleScene::DrawBattleUI() {
   }
 
   if (currentState_ == BattleState::PlayerIsChoosing) {
-    int boxWidth = 400;
-    int boxHeight = 120;
+    int skillCount = static_cast<int>(Player_.skills.size());
+    int boxWidth = 450;
+    int boxHeight = 60 + 30 * (1 + skillCount);
     int boxX = (GetScreenWidth() - boxWidth) / 2;
     int boxY = GetScreenHeight() - boxHeight - 20;
 
     DrawRectangle(boxX, boxY, boxWidth, boxHeight, Fade(BLACK, 0.8f));
-    DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, WHITE);
+    DrawRectangleLines(boxX, boxY, boxWidth, boxHeight, GOLD);
 
     // Tulis teks pilihan
     DrawText("Giliranmu!", boxX + 20, boxY + 15, 20, YELLOW);
-    DrawText("Tekan [1] untuk Serang (Attack)", boxX + 20, boxY + 50, 20,
-             WHITE);
-    DrawText("Tekan [2] untuk Sembuhkan (Heal)", boxX + 20, boxY + 80, 20,
-             WHITE);
+    DrawText("Tekan [1] untuk Serang (Attack) [0 MP]", boxX + 20, boxY + 45, 18, WHITE);
+    
+    for (int i = 0; i < skillCount; ++i) {
+      const auto &skill = Player_.skills[i];
+      DrawText(TextFormat("Tekan [%d] untuk %s [%d MP]", i + 2, skill.name.c_str(), skill.manaCost),
+               boxX + 20, boxY + 75 + i * 30, 18, SKYBLUE);
+    }
   }
 }
 
