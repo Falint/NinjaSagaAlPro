@@ -47,6 +47,7 @@ constexpr const char *ASSET_INVENTORY_FRAME = "assets/sprites/ui/Inv.png";
 constexpr const char *ASSET_INVENTORY_HITBOX =
     "assets/sprites/ui/Inv_hitbox.png";
 constexpr const char *ASSET_CHARACTER_IDLE = "assets/sprites/ui/idle_down.png";
+constexpr const char *ASSET_BTN_KEMBALI = "assets/sprites/ui/button/btn back.png";
 
 // Offset dan Scale untuk karakter animasi di UI Inventory
 constexpr float INV_CHAR_SCALE =
@@ -73,7 +74,7 @@ constexpr int INV_GRID_ROWS = 3;
 constexpr int INV_SLOT_COUNT = INV_GRID_COLS * INV_GRID_ROWS; // 9
 
 // Debug flags per-scene (set true untuk melihat kotak hitbox berwarna)
-constexpr bool INV_DEBUG_HITBOX = true;
+constexpr bool INV_DEBUG_HITBOX = false;
 constexpr bool MENU_DEBUG_HITBOX = false;
 
 // Per-slot hitbox (rasio relatif terhadap cell size masing-masing)
@@ -91,6 +92,12 @@ constexpr float INV_SLOT_HITBOXES[INV_SLOT_COUNT][4] = {
     {0.13f, -0.03f, 0.74f, 0.77f}, // Slot 7 (tengah bawah)
     {-0.01f, -0.03f, 0.74f, 0.77f}, // Slot 8 (kanan bawah)
 };
+
+// Ukuran dan posisi gambar tombol kembali
+constexpr float INV_BTN_KEMBALI_VISUAL[4] = {-0.25f, 1.0f, 0.50f, 0.22f};
+// Ukuran Hitbox tombol kembali 
+constexpr float INV_BTN_KEMBALI_HITBOX[4] = {-0.206f, 1.065f, 0.4f, 0.09f,};
+constexpr bool INV_BTN_KEMBALI_DEBUG_HITBOX = false; // Untuk Hitbox dan Gambar 
 
 //===============================================
 // -- Battle Scene Constants --

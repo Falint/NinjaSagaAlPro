@@ -36,6 +36,7 @@ private:
   
   GameContext context_;
   Texture2D invTexture_ = {}; // Inv.png — background frame inventory
+  Texture2D btnKembaliTex_ = {}; // btn back.png
   Texture2D hitboxTexture_ =
       {}; // Inv_hitbox.png — overlay yang berpindah ke slot hover
   int hoveredSlot_ = -1; // -1 = tidak ada hover, 0-8 = index slot

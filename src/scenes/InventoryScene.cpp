@@ -25,6 +25,26 @@ InvLayout InventoryScene::CalcLayout() const {
   return {imgX, imgY, drawSize, cellW, cellH, finalScale};
 }
 
+// Kotak untuk GAMBAR tombol (visual)
+static Rectangle GetBtnKembaliVisualRect(const InvLayout &layout) {
+  float bx = layout.imgX + (layout.drawSize / 2.0f) +
+             (INV_BTN_KEMBALI_VISUAL[0] * layout.drawSize);
+  float by = layout.imgY + (INV_BTN_KEMBALI_VISUAL[1] * layout.drawSize);
+  float bw = INV_BTN_KEMBALI_VISUAL[2] * layout.drawSize;
+  float bh = INV_BTN_KEMBALI_VISUAL[3] * layout.drawSize;
+  return {bx, by, bw, bh};
+}
+
+// Kotak untuk AREA KLIK tombol (hitbox)
+static Rectangle GetBtnKembaliHitboxRect(const InvLayout &layout) {
+  float bx = layout.imgX + (layout.drawSize / 2.0f) +
+             (INV_BTN_KEMBALI_HITBOX[0] * layout.drawSize);
+  float by = layout.imgY + (INV_BTN_KEMBALI_HITBOX[1] * layout.drawSize);
+  float bw = INV_BTN_KEMBALI_HITBOX[2] * layout.drawSize;
+  float bh = INV_BTN_KEMBALI_HITBOX[3] * layout.drawSize;
+  return {bx, by, bw, bh};
+}
+
 void InventoryScene::OnEnter() {
   // Load background inventory (grid 3x3)
   invTexture_ = LoadTexture(ASSET_INVENTORY_FRAME);
@@ -46,42 +66,57 @@ void InventoryScene::OnEnter() {
     std::cerr << "[ERROR] Gagal load texture: " << ASSET_CHARACTER_IDLE
               << std::endl;
   }
+
+  // Load gambar button back
+  btnKembaliTex_ = LoadTexture(ASSET_BTN_KEMBALI);
+  if (btnKembaliTex_.id == 0) {
+    std::cerr << "[ERROR] Gagal load texture: " << ASSET_BTN_KEMBALI
+              << std::endl;
+  }
 }
 
 SceneType InventoryScene::Update(float dt) {
   (void)dt;
-
-  // Kembali ke Main Menu dengan ESC atau BACKSPACE
+  
+  // ── Kembali ke Main Menu dengan ESC atau BACKSPACE 
   if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) {
     return SceneType::MainMenu;
   }
-
+ 
   // ── Hitung layout menggunakan helper terpusat ──
   InvLayout layout = CalcLayout();
-
+ 
   // ── Deteksi mouse ada di cell mana ──
   Vector2 mouse = GetMousePosition();
   hoveredSlot_ = -1;
-
+ 
   for (int i = 0; i < INV_SLOT_COUNT; i++) {
     int col = i % INV_GRID_COLS;
     int row = i / INV_GRID_COLS;
-
+ 
     float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
     float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
-
+ 
     float hx = cellX + (INV_SLOT_HITBOXES[i][0] * layout.cellW);
     float hy = cellY + (INV_SLOT_HITBOXES[i][1] * layout.cellH);
     float hw = INV_SLOT_HITBOXES[i][2] * layout.cellW;
     float hh = INV_SLOT_HITBOXES[i][3] * layout.cellH;
-
+ 
     Rectangle hitboxRect = {hx, hy, hw, hh};
-
+ 
     if (CheckCollisionPointRec(mouse, hitboxRect)) {
       hoveredSlot_ = i;
-      break;
+      break; 
     }
   }
+   //Tombol Kembali klik 
+    if (btnKembaliTex_.id != 0) {
+      Rectangle btnR = GetBtnKembaliHitboxRect(layout);
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        CheckCollisionPointRec(mouse, btnR)) {
+        return SceneType::MainMenu;
+      }
+    }
 
   // ── Update Animasi Karakter ──
   // Kecepatan animasi (berapa frame per detik)
@@ -220,6 +255,25 @@ void InventoryScene::Draw() {
     const char *slotText = TextFormat("Hover: Slot %d", hoveredSlot_);
     DrawText(slotText, 20, 50, 20, GREEN);
   }
+  
+  // Draw tombol kembali
+  // Draw tombol kembali
+  if (btnKembaliTex_.id != 0) {
+      Rectangle visualR = GetBtnKembaliVisualRect(layout);   // untuk gambar
+      Rectangle hitboxR = GetBtnKembaliHitboxRect(layout);   // untuk klik
+      bool hov = CheckCollisionPointRec(GetMousePosition(), hitboxR);
+      if (hov) {
+          SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+      }
+
+      Rectangle src = { 0, 0, (float)btnKembaliTex_.width, (float)btnKembaliTex_.height };
+      DrawTexturePro(btnKembaliTex_, src, visualR, {0,0}, 0.0f,
+          hov ? Color{255,255,255,200} : WHITE);
+      if (INV_BTN_KEMBALI_DEBUG_HITBOX) {
+        DrawRectangleLinesEx(hitboxR, 2.0f, RED);   // garis merah = area klik
+        DrawRectangleLinesEx(visualR, 2.0f, GREEN); // garis hijau = area gambar
+      }
+    }   
 }
 
 void InventoryScene::OnExit() {
@@ -230,6 +284,10 @@ void InventoryScene::OnExit() {
   if (hitboxTexture_.id != 0) {
     UnloadTexture(hitboxTexture_);
     hitboxTexture_ = {};
+  }
+  if (btnKembaliTex_.id != 0) {
+    UnloadTexture(btnKembaliTex_);
+    btnKembaliTex_ = {};
   }
   // Unload texture karakter saat keluar dari Scene Inventory
   if (charTexture_.id != 0) {
