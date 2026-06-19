@@ -27,6 +27,9 @@ public:
 private:
   GameContext context_;
 
+  // Textures Background
+  Texture2D backgroundTex_ = {};
+
   // Textures Player
   Texture2D playerIdleTex_ = {};
   Texture2D playerAttackTex_ = {};

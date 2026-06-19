@@ -102,6 +102,10 @@ constexpr bool INV_BTN_KEMBALI_DEBUG_HITBOX = false; // Untuk Hitbox dan Gambar
 //===============================================
 // -- Battle Scene Constants --
 //===============================================
+
+// Assets Battle Background
+constexpr const char *ASSET_BATTLE_BACKGROUND = "assets/maps/battle_bkg.png";
+
 // Assets Player
 constexpr const char *ASSET_BATTLE_PLAYER_IDLE =
     "assets/sprites/ui/Player/man/idle.png";

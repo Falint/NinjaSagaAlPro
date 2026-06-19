@@ -6,6 +6,10 @@
 BattleScene::BattleScene(GameContext ctx) : context_(ctx) {}
 
 void BattleScene::OnEnter() {
+
+  // Load Background Texture
+  backgroundTex_ = LoadTexture(ASSET_BATTLE_BACKGROUND);
+
   // Load Textures Player
   playerIdleTex_ = LoadTexture(ASSET_BATTLE_PLAYER_IDLE);
   playerAttackTex_ = LoadTexture(ASSET_BATTLE_PLAYER_ATTACK);
@@ -254,7 +258,14 @@ void BattleScene::UpdateAnimations() {
 }
 
 void BattleScene::Draw() {
-  ClearBackground(DARKGRAY);
+  if (backgroundTex_.id != 0) {
+    DrawTexturePro(backgroundTex_, 
+                   {0.0f, 0.0f, static_cast<float>(backgroundTex_.width), static_cast<float>(backgroundTex_.height)}, 
+                   {0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, 
+                   {0.0f, 0.0f}, 0.0f, WHITE);
+  } else {
+    ClearBackground(DARKGRAY); // Fallback jika gambar gagal di-load
+  }
 
   DrawPlayer();
   DrawEnemy();
@@ -414,6 +425,10 @@ void BattleScene::DrawBattleUI() {
 
 void BattleScene::OnExit() {
   // Guard: hanya UnloadTexture jika texture berhasil di-load
+  if (backgroundTex_.id != 0) {
+    UnloadTexture(backgroundTex_);
+    backgroundTex_ = {};
+  }
   if (playerIdleTex_.id != 0) {
     UnloadTexture(playerIdleTex_);
     playerIdleTex_ = {};
