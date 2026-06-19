@@ -30,4 +30,5 @@ private:
   GameContext context_;
   Texture2D menuFrames_[6] = {};
   int currentFrameIndex_ = 0;
+  Music menuBgm_ = {};
 };

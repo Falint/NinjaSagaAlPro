@@ -40,11 +40,22 @@ void MainMenuScene::OnEnter() {
       std::cerr << "[ERROR] Gagal load texture frame index: " << i << std::endl;
     }
   }
+
+  menuBgm_ = LoadMusicStream(ASSET_MENU_BGM);
+  if (menuBgm_.stream.buffer != nullptr) {
+    PlayMusicStream(menuBgm_);
+  } else {
+    std::cerr << "[ERROR] Gagal load BGM: " << ASSET_MENU_BGM << std::endl;
+  }
 }
 
 // ─── Update ──────────────────────────────────────────────────
 SceneType MainMenuScene::Update(float dt) {
   (void)dt;
+
+  if (menuBgm_.stream.buffer != nullptr) {
+    UpdateMusicStream(menuBgm_);
+  }
 
   if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) {
     return SceneType::Exit;
@@ -164,7 +175,13 @@ void MainMenuScene::OnExit() {
   }
 
   if (menuBackgroundTex_.id != 0) {
-        UnloadTexture(menuBackgroundTex_);
-        menuBackgroundTex_ = {};
-    }
+    UnloadTexture(menuBackgroundTex_);
+    menuBackgroundTex_ = {};
+  }
+
+  if (menuBgm_.stream.buffer != nullptr) {
+    StopMusicStream(menuBgm_);
+    UnloadMusicStream(menuBgm_);
+    menuBgm_ = {};
+  }
 }
