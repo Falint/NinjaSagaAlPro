@@ -33,6 +33,8 @@ void AcademyScene::OnEnter() {
   academyFrames_[2] = LoadTexture(ASSET_ACADEMY_FRAME_3);
   academyFrames_[3] = LoadTexture(ASSET_ACADEMY_FRAME_4);
 
+  menuBackgroundTex_ = LoadTexture(ASSET_MENU_BACKGROUND);
+
   for (int i = 0; i < 4; i++) {
     if (academyFrames_[i].id == 0) {
       std::cerr << "[ERROR] Gagal load Academy frame index: " << i
@@ -195,7 +197,14 @@ SceneType AcademyScene::Update(float dt) {
 
 // ─── Draw ────────────────────────────────────────────────────
 void AcademyScene::Draw() {
-  ClearBackground(BLACK);
+  if (menuBackgroundTex_.id != 0) {
+        DrawTexturePro(menuBackgroundTex_, 
+                       {0.0f, 0.0f, static_cast<float>(menuBackgroundTex_.width), static_cast<float>(menuBackgroundTex_.height)}, 
+                       {0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, 
+                       {0.0f, 0.0f}, 0.0f, WHITE);
+    } else {
+        ClearBackground(BLACK);
+    }
 
   AcademyLayout layout = CalcLayout();
 
@@ -361,6 +370,10 @@ void AcademyScene::Draw() {
 
 // ─── OnExit ──────────────────────────────────────────────────
 void AcademyScene::OnExit() {
+  if (menuBackgroundTex_.id != 0) {
+        UnloadTexture(menuBackgroundTex_);
+        menuBackgroundTex_ = {};
+    }
   for (int i = 0; i < 4; i++) {
     if (academyFrames_[i].id != 0) {
       UnloadTexture(academyFrames_[i]);

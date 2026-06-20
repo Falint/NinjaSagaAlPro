@@ -35,6 +35,7 @@ private:
   int charNumFrames_ = 8;          // Jumlah total frame dalam sprite (768px / 96px = 8)
   
   GameContext context_;
+  Texture2D menuBackgroundTex_ = {}; // Background Inventory
   Texture2D invTexture_ = {}; // Inv.png — background frame inventory
   Texture2D btnKembaliTex_ = {}; // btn back.png
   Texture2D hitboxTexture_ =

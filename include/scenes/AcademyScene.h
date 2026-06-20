@@ -31,6 +31,8 @@ private:
 
   GameContext context_;
 
+  Texture2D menuBackgroundTex_ = {}; // Background Menu Academy
+
   // 4 frame Academy (idle + 3 hover state)
   Texture2D academyFrames_[4] = {};
 

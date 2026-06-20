@@ -48,6 +48,7 @@ static Rectangle GetBtnKembaliHitboxRect(const InvLayout &layout) {
 
 void InventoryScene::OnEnter() {
   // Load background inventory (grid 3x3)
+  menuBackgroundTex_ = LoadTexture(ASSET_MENU_BACKGROUND); // Menu Inventory Background
   invTexture_ = LoadTexture(ASSET_INVENTORY_FRAME);
   if (invTexture_.id == 0) {
     std::cerr << "[ERROR] Gagal load texture: " << ASSET_INVENTORY_FRAME
@@ -145,8 +146,14 @@ SceneType InventoryScene::Update(float dt) {
 }
 
 void InventoryScene::Draw() {
-  ClearBackground(BLACK);
-
+  if (menuBackgroundTex_.id != 0) {
+        DrawTexturePro(menuBackgroundTex_, 
+                       {0.0f, 0.0f, static_cast<float>(menuBackgroundTex_.width), static_cast<float>(menuBackgroundTex_.height)}, 
+                       {0.0f, 0.0f, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, 
+                       {0.0f, 0.0f}, 0.0f, WHITE);
+    } else {
+        ClearBackground(BLACK);
+    }
   // ── Hitung layout menggunakan helper terpusat ──
   InvLayout layout = CalcLayout();
 
@@ -323,6 +330,10 @@ void InventoryScene::Draw() {
 }
 
 void InventoryScene::OnExit() {
+  if (menuBackgroundTex_.id != 0) {
+        UnloadTexture(menuBackgroundTex_);
+        menuBackgroundTex_ = {};
+    }
   if (invTexture_.id != 0) {
     UnloadTexture(invTexture_);
     invTexture_ = {};
