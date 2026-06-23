@@ -107,7 +107,7 @@ constexpr bool INV_BTN_KEMBALI_DEBUG_HITBOX = false; // Untuk Hitbox dan Gambar
 // -- Main Menu Scene Constants --
 constexpr const char *ASSET_MENU_BACKGROUND = "assets/sprites/ui/main_menuBackground.png";
 constexpr const char *ASSET_MENU_BGM = "assets/audio/soundtrack/MiniMacro Sound - The Ninja Gaiden Soundtrack as Interpreted by MiniMacro Sound - 04 Vow of Revenge (Opening II).mp3";
-
+constexpr const char *ASSET_BATTLE_BGM = "assets/audio/soundtrack/Battle_for_RPG1.mp3";
 //===============================================
 // -- Mission Rank Scene Constants --
 //===============================================

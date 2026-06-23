@@ -96,4 +96,5 @@ private:
   void DrawManaBar(float x, float y, int currentMP, int maxMP);
   void DrawBattleUI();
   void UpdateAnimations();
+  Music battleBgm_ = {};
 };

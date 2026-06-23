@@ -6,6 +6,12 @@
 BattleScene::BattleScene(GameContext ctx) : context_(ctx) {}
 
 void BattleScene::OnEnter() {
+  battleBgm_ = LoadMusicStream(ASSET_BATTLE_BGM);
+  if (battleBgm_.stream.buffer != nullptr) {
+    PlayMusicStream(battleBgm_);
+  } else {
+    std::cerr << "[ERROR] Gagal load BGM: " << ASSET_BATTLE_BGM << std::endl;
+  }
 
   // Load Background Texture
   backgroundTex_ = LoadTexture(ASSET_BATTLE_BACKGROUND);
@@ -84,6 +90,10 @@ void BattleScene::OnEnter() {
 }
 
 SceneType BattleScene::Update(float dt) {
+  if (battleBgm_.stream.buffer != nullptr) {
+    UpdateMusicStream(battleBgm_);
+  }
+
   stateTimer_ += dt;
   UpdateAnimations();
 
@@ -586,5 +596,11 @@ void BattleScene::OnExit() {
       UnloadTexture(manaFillTex_[i]);
       manaFillTex_[i] = {};
     }
+  }
+
+  if (battleBgm_.stream.buffer != nullptr) {
+    StopMusicStream(battleBgm_);
+    UnloadMusicStream(battleBgm_);
+    battleBgm_ = {};
   }
 }
