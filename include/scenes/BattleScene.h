@@ -45,6 +45,10 @@ private:
   Texture2D healthBgTex_ = {};
   Texture2D healthFillTex_[10] = {}; // redMeter01 sampai redMeter10
 
+  // Textures Mana Bar
+  Texture2D manaBgTex_ = {};
+  Texture2D manaFillTex_[10] = {}; // blueMeter01 sampai blueMeter10
+
   // Battle State
   BattleState currentState_ = BattleState::Start;
   float stateTimer_ = 0.0f;

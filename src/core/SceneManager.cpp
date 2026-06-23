@@ -4,6 +4,7 @@
 #include "scenes/InventoryScene.h"
 #include "scenes/AcademyScene.h"
 #include "scenes/BattleScene.h"
+#include "scenes/MissionRankScene.h"
 #include "types.h"
 #include <memory>
 
@@ -31,6 +32,9 @@ void SceneManager::ChangeScene(SceneType type) {
     break;
   case SceneType::MainMenu:
     activeScene_ = std::make_unique<MainMenuScene>(context_);
+    break;
+  case SceneType::MissionRank:
+    activeScene_ = std::make_unique<MissionRankScene>(context_);
     break;
   case SceneType::Inventory:
     activeScene_ = std::make_unique<InventoryScene>(context_);

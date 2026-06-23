@@ -108,6 +108,26 @@ constexpr bool INV_BTN_KEMBALI_DEBUG_HITBOX = false; // Untuk Hitbox dan Gambar
 constexpr const char *ASSET_MENU_BACKGROUND = "assets/sprites/ui/main_menuBackground.png";
 constexpr const char *ASSET_MENU_BGM = "assets/audio/soundtrack/MiniMacro Sound - The Ninja Gaiden Soundtrack as Interpreted by MiniMacro Sound - 04 Vow of Revenge (Opening II).mp3";
 
+//===============================================
+// -- Mission Rank Scene Constants --
+//===============================================
+constexpr const char *ASSET_MISSION_FRAME_1 = "assets/sprites/ui/missionrank1.png";
+constexpr const char *ASSET_MISSION_FRAME_2 = "assets/sprites/ui/missionrank2.png";
+constexpr const char *ASSET_MISSION_FRAME_3 = "assets/sprites/ui/missionrank3.png";
+constexpr const char *ASSET_MISSION_FRAME_4 = "assets/sprites/ui/missionrank4.png";
+constexpr const char *ASSET_MISSION_FRAME_5 = "assets/sprites/ui/missionrank5.png";
+constexpr const char *ASSET_MISSION_FRAME_6 = "assets/sprites/ui/missionrank6.png";
+
+constexpr int MISSION_RANK_COUNT = 5;
+constexpr float MISSION_RANK_HITBOXES[MISSION_RANK_COUNT][4] = {
+    {0.2950f, 0.2600f, 0.3050f, 0.0800f}, // Rank S
+    {0.2950f, 0.3400f, 0.3050f, 0.0850f}, // Rank A
+    {0.2950f, 0.4250f, 0.3050f, 0.0850f}, // Rank B
+    {0.2950f, 0.5100f, 0.3050f, 0.0850f}, // Rank C
+    {0.2950f, 0.5950f, 0.3050f, 0.0850f}, // Rank D
+};
+constexpr bool MISSION_DEBUG_HITBOX = false;
+
 
 // Assets Battle Background
 constexpr const char *ASSET_BATTLE_BACKGROUND = "assets/maps/battle_bkg.png";
@@ -136,6 +156,12 @@ constexpr const char *ASSET_BATTLE_HEALTH_BG =
 // redMeter10.png
 constexpr const char *ASSET_BATTLE_HEALTH_FILL_PREFIX =
     "assets/sprites/ui/bar/health/redMeter";
+
+// Assets Mana Bar
+constexpr const char *ASSET_BATTLE_MANA_BG =
+    "assets/sprites/ui/bar/mana/emptyCellMeter.png";
+constexpr const char *ASSET_BATTLE_MANA_FILL_PREFIX =
+    "assets/sprites/ui/bar/mana/blueMeter";
 
 // Battle Stats
 constexpr int BATTLE_PLAYER_MAX_HP = 10;

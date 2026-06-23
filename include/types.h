@@ -5,6 +5,7 @@ enum class SceneType {
   None,
   Splash,
   MainMenu,
+  MissionRank,
   Gameplay,
   Inventory,
   Academy,

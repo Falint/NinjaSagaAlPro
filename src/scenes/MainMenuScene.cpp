@@ -85,8 +85,8 @@ SceneType MainMenuScene::Update(float dt) {
         MenuButton clicked = static_cast<MenuButton>(i + 1);
         switch (clicked) {
         case MenuButton::Play:
-          std::cout << "[MainMenu] PLAY clicked -> Go to Battle" << std::endl;
-          return SceneType::Gameplay;
+          std::cout << "[MainMenu] PLAY clicked -> Go to Mission Rank" << std::endl;
+          return SceneType::MissionRank;
         case MenuButton::Shop:
           std::cout << "[MainMenu] SHOP clicked -> Go To Academy" << std::endl;
           return SceneType::Academy;

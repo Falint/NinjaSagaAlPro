@@ -29,6 +29,14 @@ void BattleScene::OnEnter() {
     healthFillTex_[i] = LoadTexture(path.c_str());
   }
 
+  // Load Mana Bar
+  manaBgTex_ = LoadTexture(ASSET_BATTLE_MANA_BG);
+  for (int i = 0; i < 10; i++) {
+    std::string path = std::string(ASSET_BATTLE_MANA_FILL_PREFIX) +
+                       (i < 9 ? "0" : "") + std::to_string(i + 1) + ".png";
+    manaFillTex_[i] = LoadTexture(path.c_str());
+  }
+
   // Init Stats
   if (context_.player) {
     Player_ = *context_.player;
@@ -418,49 +426,65 @@ void BattleScene::DrawEnemy() {
 }
 
 void BattleScene::DrawHealthBar(float x, float y, int currentHP, int maxHP) {
-  float barW = 160.0f;
-  float barH = 20.0f;
+  float scale = 2.5f; // 64 * 2.5 = 160px, cocok dengan lebar Mana bar
+  float drawW = static_cast<float>(healthBgTex_.width) * scale;
+  float drawH = static_cast<float>(healthBgTex_.height) * scale;
+
+  Rectangle src = {0, 0, static_cast<float>(healthBgTex_.width),
+                   static_cast<float>(healthBgTex_.height)};
+  Rectangle dst = {x, y, drawW, drawH};
 
   // Draw Background
-  DrawRectangle(x, y, barW, barH, Color{40, 40, 40, 220});
+  if (healthBgTex_.id != 0) {
+    DrawTexturePro(healthBgTex_, src, dst, {0, 0}, 0.0f, WHITE);
+  }
 
   // Draw Fill
   if (currentHP > 0) {
-    float ratio = static_cast<float>(currentHP) / static_cast<float>(maxHP);
-    if (ratio > 1.0f) ratio = 1.0f;
-    DrawRectangle(x, y, barW * ratio, barH, RED);
+    int index = (currentHP * 10) / maxHP;
+    if (index < 1) index = 1;
+    if (index > 10) index = 10;
+
+    if (healthFillTex_[index - 1].id != 0) {
+      DrawTexturePro(healthFillTex_[index - 1], src, dst, {0, 0}, 0.0f, WHITE);
+    }
   }
 
-  // Draw Border
-  DrawRectangleLinesEx({x, y, barW, barH}, 1.5f, LIGHTGRAY);
-
-  // Draw HP Text
+  // Draw HP Text di tengah bar
   std::string text = "HP: " + std::to_string(currentHP) + "/" + std::to_string(maxHP);
   int textWidth = MeasureText(text.c_str(), 12);
-  DrawText(text.c_str(), x + (barW - textWidth) / 2.0f, y + (barH - 12) / 2.0f, 12, WHITE);
+  DrawText(text.c_str(), x + (drawW - textWidth) / 2.0f, y + (drawH - 12) / 2.0f, 12, WHITE);
 }
 
 void BattleScene::DrawManaBar(float x, float y, int currentMP, int maxMP) {
-  float barW = 160.0f;
-  float barH = 20.0f;
+  float scale = 2.5f; // 64 * 2.5 = 160px, cocok dengan lebar Health bar
+  float drawW = static_cast<float>(manaBgTex_.width) * scale;
+  float drawH = static_cast<float>(manaBgTex_.height) * scale;
+
+  Rectangle src = {0, 0, static_cast<float>(manaBgTex_.width),
+                   static_cast<float>(manaBgTex_.height)};
+  Rectangle dst = {x, y, drawW, drawH};
 
   // Draw Background
-  DrawRectangle(x, y, barW, barH, Color{40, 40, 40, 220});
+  if (manaBgTex_.id != 0) {
+    DrawTexturePro(manaBgTex_, src, dst, {0, 0}, 0.0f, WHITE);
+  }
 
   // Draw Fill
   if (currentMP > 0) {
-    float ratio = static_cast<float>(currentMP) / static_cast<float>(maxMP);
-    if (ratio > 1.0f) ratio = 1.0f;
-    DrawRectangle(x, y, barW * ratio, barH, SKYBLUE);
+    int index = (currentMP * 10) / maxMP;
+    if (index < 1) index = 1;
+    if (index > 10) index = 10;
+
+    if (manaFillTex_[index - 1].id != 0) {
+      DrawTexturePro(manaFillTex_[index - 1], src, dst, {0, 0}, 0.0f, WHITE);
+    }
   }
 
-  // Draw Border
-  DrawRectangleLinesEx({x, y, barW, barH}, 1.5f, LIGHTGRAY);
-
-  // Draw MP Text
+  // Draw MP Text di tengah bar
   std::string text = "MP: " + std::to_string(currentMP) + "/" + std::to_string(maxMP);
   int textWidth = MeasureText(text.c_str(), 12);
-  DrawText(text.c_str(), x + (barW - textWidth) / 2.0f, y + (barH - 12) / 2.0f, 12, WHITE);
+  DrawText(text.c_str(), x + (drawW - textWidth) / 2.0f, y + (drawH - 12) / 2.0f, 12, WHITE);
 }
 
 void BattleScene::DrawBattleUI() {
@@ -550,6 +574,17 @@ void BattleScene::OnExit() {
     if (healthFillTex_[i].id != 0) {
       UnloadTexture(healthFillTex_[i]);
       healthFillTex_[i] = {};
+    }
+  }
+
+  if (manaBgTex_.id != 0) {
+    UnloadTexture(manaBgTex_);
+    manaBgTex_ = {};
+  }
+  for (int i = 0; i < 10; i++) {
+    if (manaFillTex_[i].id != 0) {
+      UnloadTexture(manaFillTex_[i]);
+      manaFillTex_[i] = {};
     }
   }
 }
