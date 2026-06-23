@@ -37,6 +37,12 @@ CTestTestfile.cmake
 # Save files (jangan di-commit)
 *.dat
 *.sav
+*savegame.txt
+
+# Scratch / Temp files
+scratch/
+analyze
+analyze.cpp
 
 # macOS
 .DS_Store

@@ -38,8 +38,6 @@ private:
   Texture2D menuBackgroundTex_ = {}; // Background Inventory
   Texture2D invTexture_ = {}; // Inv.png — background frame inventory
   Texture2D btnKembaliTex_ = {}; // btn back.png
-  Texture2D hitboxTexture_ =
-      {}; // Inv_hitbox.png — overlay yang berpindah to slot hover
   Texture2D skillIcons_[3] = {}; // Icon skill 01 - 03
   int hoveredSlot_ = -1; // -1 = tidak ada hover, 0-8 = index slot
 };

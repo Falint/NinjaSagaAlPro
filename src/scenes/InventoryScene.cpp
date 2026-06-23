@@ -55,12 +55,6 @@ void InventoryScene::OnEnter() {
               << std::endl;
   }
 
-  // Load overlay highlight yang akan berpindah ke slot yang di-hover
-  hitboxTexture_ = LoadTexture(ASSET_INVENTORY_HITBOX);
-  if (hitboxTexture_.id == 0) {
-    std::cerr << "[ERROR] Gagal load texture: " << ASSET_INVENTORY_HITBOX
-              << std::endl;
-  }
 
   // Load texture karakter untuk animasi di samping inventory
   charTexture_ = LoadTexture(ASSET_CHARACTER_IDLE);
@@ -199,10 +193,7 @@ void InventoryScene::Draw() {
     float cellX = layout.imgX + static_cast<float>(col) * layout.cellW;
     float cellY = layout.imgY + static_cast<float>(row) * layout.cellH;
 
-    // Render Inv_hitbox.png sesuai nilai hitbox di constants.h
-    Rectangle hitboxSrc = {0, 0, static_cast<float>(hitboxTexture_.width),
-                           static_cast<float>(hitboxTexture_.height)};
-
+    // Gambar highlight persegi putih semi-transparan sebagai penanda hover
     float hx = cellX + (INV_SLOT_HITBOXES[hoveredSlot_][0] * layout.cellW);
     float hy = cellY + (INV_SLOT_HITBOXES[hoveredSlot_][1] * layout.cellH);
     float hw = INV_SLOT_HITBOXES[hoveredSlot_][2] * layout.cellW;
@@ -210,7 +201,7 @@ void InventoryScene::Draw() {
 
     Rectangle hitboxDst = {hx, hy, hw, hh};
 
-    DrawTexturePro(hitboxTexture_, hitboxSrc, hitboxDst, {0, 0}, 0.0f, WHITE);
+    DrawRectangleRec(hitboxDst, {255, 255, 255, 80}); // Warna putih transparan
 
     // Ubah cursor jadi pointing hand
     SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
@@ -337,10 +328,6 @@ void InventoryScene::OnExit() {
   if (invTexture_.id != 0) {
     UnloadTexture(invTexture_);
     invTexture_ = {};
-  }
-  if (hitboxTexture_.id != 0) {
-    UnloadTexture(hitboxTexture_);
-    hitboxTexture_ = {};
   }
   if (btnKembaliTex_.id != 0) {
     UnloadTexture(btnKembaliTex_);

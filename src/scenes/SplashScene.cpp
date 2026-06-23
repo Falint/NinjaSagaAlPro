@@ -27,18 +27,9 @@ SceneType SplashScene::Update(float dt) {
   if (timer_ < SPLASH_FADE_IN_DURATION) {
     alpha_ = timer_ / SPLASH_FADE_IN_DURATION;
   }
-  // Phase 2: Hold (fully visible)
-  else if (timer_ < SPLASH_FADE_IN_DURATION + SPLASH_HOLD_DURATION) {
-    alpha_ = 1.0f;
-  }
-  // Phase 3: Fade Out
-  else if (timer_ < SPLASH_TOTAL_DURATION) {
-    float t = timer_ - SPLASH_FADE_IN_DURATION - SPLASH_HOLD_DURATION;
-    alpha_ = 1.0f - (t / SPLASH_FADE_OUT_DURATION);
-  }
-  // Selesai → pindah ke MainMenu
+  // Phase 2: Hold indefinitely (menunggu input user)
   else {
-    return SceneType::MainMenu;
+    alpha_ = 1.0f;
   }
 
   return SceneType::None; // tetap di splash
@@ -53,7 +44,8 @@ void SplashScene::Draw() {
   unsigned char a = static_cast<unsigned char>(alpha_ * 255.0f);
 
   // Warna teks dengan alpha
-  Color titleColor = {255, 200, 80, a}; // Warna emas/kuning ninja
+  Color titleColor = {0, 228, 255, a}; // Biru Neon
+  Color titleShadow = {180, 180, 180, a}; // Putih agak abu-abu
   Color subColor = {200, 200, 200, a};  // Abu-abu terang
 
   // Title "NINJA SAGA"
@@ -62,14 +54,30 @@ void SplashScene::Draw() {
   int titleWidth = MeasureText(title, titleSize);
   int titleX = (screenW - titleWidth) / 2;
   int titleY = (screenH / 2) - titleSize;
+  
+  // Gambar bayangan untuk NINJA SAGA
+  DrawText(title, titleX + 4, titleY + 4, titleSize, titleShadow);
+  // Gambar teks utama NINJA SAGA
   DrawText(title, titleX, titleY, titleSize, titleColor);
 
-  // Subtitle
+  // Subtitle "AlPro"
+  const char *alpro = "AlPro";
+  int alproSize = static_cast<int>(titleSize * 0.7f); // Sedikit lebih besar dari sebelumnya
+  int alproWidth = MeasureText(alpro, alproSize);
+  int alproX = (screenW - alproWidth) / 2;
+  int alproY = titleY + titleSize + 10;
+  
+  Color alproColor = {220, 220, 220, a}; // Abu-abu terang
+  
+  // Gambar teks utamanya saja untuk AlPro (tanpa shadow tebal seperti sebelumnya)
+  DrawText(alpro, alproX, alproY, alproSize, alproColor);
+
+  // Subtitle instruksi
   const char *subtitle = "Press any key to continue...";
   int subSize = 20;
   int subWidth = MeasureText(subtitle, subSize);
   int subX = (screenW - subWidth) / 2;
-  int subY = titleY + titleSize + 30;
+  int subY = alproY + alproSize + 40;
 
   // Subtitle hanya muncul saat hold phase (sudah fully visible)
   if (timer_ >= SPLASH_FADE_IN_DURATION) {

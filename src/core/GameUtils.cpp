@@ -22,7 +22,7 @@ namespace GameUtils {
     // Tulis daftar skill
     outFile << player.skills.size() << "\n";
     for (const auto& skill : player.skills) {
-      outFile << skill.name << "|" << skill.manaCost << "|" << skill.baseDamage << "|" << skill.healAmount << "|" << static_cast<int>(skill.target) << "\n";
+      outFile << skill.id << "|" << skill.name << "|" << skill.manaCost << "|" << skill.baseDamage << "|" << skill.healAmount << "|" << static_cast<int>(skill.target) << "\n";
     }
 
     outFile.close();
@@ -80,14 +80,51 @@ namespace GameUtils {
       }
       tokens.push_back(line);
 
-      if (tokens.size() >= 5) {
+      if (tokens.size() >= 6) {
+        Skill skill;
+        skill.id = std::stoi(tokens[0]);
+        skill.name = tokens[1];
+        skill.manaCost = std::stoi(tokens[2]);
+        skill.baseDamage = std::stoi(tokens[3]);
+        skill.healAmount = std::stoi(tokens[4]);
+        skill.target = static_cast<SkillTarget>(std::stoi(tokens[5]));
+        
+        bool isDuplicate = false;
+        for (const auto& existingSkill : player.skills) {
+          if (existingSkill.id == skill.id) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        
+        if (!isDuplicate) {
+          player.skills.push_back(skill);
+        }
+      } else if (tokens.size() == 5) {
+        // Backward compatibility for old save format without ID
         Skill skill;
         skill.name = tokens[0];
         skill.manaCost = std::stoi(tokens[1]);
         skill.baseDamage = std::stoi(tokens[2]);
         skill.healAmount = std::stoi(tokens[3]);
         skill.target = static_cast<SkillTarget>(std::stoi(tokens[4]));
-        player.skills.push_back(skill);
+        
+        // Recover ID based on name for legacy saves
+        if (skill.name == "Fire Slash") skill.id = 1;
+        else if (skill.name == "Ice Slash") skill.id = 2;
+        else if (skill.name == "Heal") skill.id = 3;
+        
+        bool isDuplicate = false;
+        for (const auto& existingSkill : player.skills) {
+          if (existingSkill.id == skill.id) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        
+        if (!isDuplicate) {
+          player.skills.push_back(skill);
+        }
       }
     }
 

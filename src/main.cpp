@@ -71,6 +71,13 @@ int main() {
     EndDrawing();
   }
 
+  std::cout << "Menyimpan progress sebelum keluar..." << std::endl;
+  try {
+    GameUtils::SaveGame(player, savePath, onIoSuccess);
+  } catch (const std::exception& e) {
+    std::cerr << "[EXCEPTION CAUGHT] Gagal menyimpan game saat keluar: " << e.what() << std::endl;
+  }
+
   CloseAudioDevice();
   CloseWindow();
   return 0;
